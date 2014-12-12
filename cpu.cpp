@@ -3,28 +3,28 @@
 void Cpu::initializeOpcodeTables()
 {
     //0x0NNN, 0x00E0, 0x00EE
-    this.opcodeFirstNibble[0] = &(this.executeSecondNibbleOpcodes());
-    this.opcodeFirstNibble[1] = &(this.opcode0x1NNN());
-    this.opcodeFirstNibble[2] = &(this.opcode0x2NNN());
-    this.opcodeFirstNibble[3] = &(this.opcode0x3XNN());
-    this.opcodeFirstNibble[4] = &(this.opcode0x4XNN());
-    this.opcodeFirstNibble[5] = &(this.opcode0x5XY0());
-    this.opcodeFirstNibble[6] = &(this.opcode0x6XNN());
-    this.opcodeFirstNibble[7] = &(this.opcode0x7XNN());
+    this->opcodeFirstNibble[0] = &Cpu::executeSecondNibbleOpcodes;
+    this->opcodeFirstNibble[1] = &Cpu::opcode0x1NNN;
+    this->opcodeFirstNibble[2] = &Cpu::opcode0x2NNN;
+    this->opcodeFirstNibble[3] = &Cpu::opcode0x3XNN;
+    this->opcodeFirstNibble[4] = &Cpu::opcode0x4XNN;
+    this->opcodeFirstNibble[5] = &Cpu::opcode0x5XY0;
+    this->opcodeFirstNibble[6] = &Cpu::opcode0x6XNN;
+    this->opcodeFirstNibble[7] = &Cpu::opcode0x7XNN;
     //0x8XY0 - 0x8XY7 and 0x8XYE
-    this.opcodeFirstNibble[8] = &(this.executeSecondNibbleOpcodes());
-    this.opcodeFirstNibble[9] = &(this.opcode0x9XY0());
-    this.opcodeFirstNibble[0xA] = &(this.opcode0xANNN());
-    this.opcodeFirstNibble[0xB] = &(this.opcode0xBNNN());
-    this.opcodeFirstNibble[0xC] = &(this.opcode0xCXNN());
-    this.opcodeFirstNibble[0xD] = &(this.opcode0xDXYN());
-    this.opcodeFirstNibble[0xE] = &(this.executeSecondNibbleOpcodes());
-    this.opcodeFirstNibble[0xF] = &(this.executeSecondNibbleOpcodes());
+    this->opcodeFirstNibble[8] = &Cpu::executeSecondNibbleOpcodes;
+    this->opcodeFirstNibble[9] = &Cpu::opcode0x9XY0;
+    this->opcodeFirstNibble[0xA] = &Cpu::opcode0xANNN;
+    this->opcodeFirstNibble[0xB] = &Cpu::opcode0xBNNN;
+    this->opcodeFirstNibble[0xC] = &Cpu::opcode0xCXNN;
+    this->opcodeFirstNibble[0xD] = &Cpu::opcode0xDXYN;
+    this->opcodeFirstNibble[0xE] = &Cpu::executeSecondNibbleOpcodes;
+    this->opcodeFirstNibble[0xF] = &Cpu::executeSecondNibbleOpcodes;
 }
 
 void Cpu::initializeEnvironment()
 {
-    this.initializeOpcodeTables();
+    this->initializeOpcodeTables();
 }
 
 void Cpu::emulateCycle()

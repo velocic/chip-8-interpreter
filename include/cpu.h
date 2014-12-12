@@ -5,8 +5,8 @@ class Cpu
 {
     private:
         //array of opcode function pointers
-        void (*opcodeFirstNibble[16])();
-        void (*opcodeSecondNibble[23])();
+        void (Cpu::*opcodeFirstNibble[16])();
+        void (Cpu::*opcodeSecondNibble[23])();
 
         unsigned char memory[4096];
         bool graphics[64*32];
