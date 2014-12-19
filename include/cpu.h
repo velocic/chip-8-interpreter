@@ -5,18 +5,15 @@
 
 class Cpu
 {
-    private:
-        //arrays of opcode function pointers
-        void (Cpu::*opcodeJumpTable[16])();
-        void (Cpu::*opcode0x0JumpTable[3])();
-        void (Cpu::*opcode0x8JumpTable[9])();
-        void (Cpu::*opcode0xEJumpTable[2])();
-        void (Cpu::*opcode0xFJumpTable[9])();
+    typedef void (Cpu::*opcodeFunction)();
 
-        unsigned char memory[4096];
-        bool graphics[64*32];
+    private:
+        //array of opcode function pointers
+        opcodeFunction opcodeJumpTable[256];
         //16-bit opcode
         unsigned short opcode;
+        unsigned char memory[4096];
+        bool graphics[64*32];
         unsigned short stack[16];
         unsigned short stackPointer;
         //supports 16 keys 0x0 - 0xF
@@ -31,12 +28,11 @@ class Cpu
         unsigned char delayTimer;
         unsigned char soundTimer;
         
-        void initializeJumpTables();
-        void navigateJumpTable();
-        void navigate0x0JumpTable();
-        void navigate0x8JumpTable();
-        void navigate0xEJumpTable();
-        void navigate0xFJumpTable();
+        void initializeOpcodeJumpTable();
+        void opcode0x0JumpTable();
+        void opcode0x8JumpTable();
+        void opcode0xEJumpTable();
+        void opcode0xFJumpTable();
         void opcode0x0NNN();
         void opcode0x00E0();
         void opcode0x00EE();
