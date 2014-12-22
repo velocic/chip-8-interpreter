@@ -9,29 +9,22 @@ class Cpu
     typedef void (Cpu::*opcodeFunction)();
 
     private:
-        //array of opcode function pointers
-        opcodeFunction opcodeJumpTable[256];
+        opcodeFunction opcodeJumpTable[256]; //arrays of opcode function pointers
         opcodeFunction opcode0x0JumpTable[256];
         opcodeFunction opcode0x8JumpTable[256];
         opcodeFunction opcode0xEJumpTable[256];
         opcodeFunction opcode0xFJumpTable[256];
-        //16-bit opcode
-        unsigned short opcode;
+        unsigned short opcode; //unsigned short = 2-bytes
         unsigned char memory[4096];
-        bool graphics[64*32];
+        unsigned char graphics[2048]; //64 pixels * 32 pixels
         unsigned short stack[16];
         unsigned short stackPointer;
-        //supports 16 keys 0x0 - 0xF
-        unsigned char keypad[16];
-        //8-bit registers
-        unsigned char v[16];
-        //16-bit address index register
-        unsigned short i;
-        //16-bit program counter
-        unsigned short pc;
-        //8-bit sound & delay timer
-        unsigned char delayTimer;
-        unsigned char soundTimer;
+        unsigned char keypad[16]; //supports 16 keys (0x0 - 0xF)
+        unsigned char v[16]; //1-byte registers
+        unsigned short i; //2-byte address index register
+        unsigned short pc; //2-byte program counter
+        unsigned char delayTimer; //1-byte delay timer
+        unsigned char soundTimer; //1-byte sound timer
         
         void mapHexRangesToOpcodeValues(const std::map<std::pair<int, int>, opcodeFunction> &opcodeHandlerMap, opcodeFunction (&jumpTable)[256]);
         void initializeOpcodeJumpTable();

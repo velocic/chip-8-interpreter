@@ -1,5 +1,4 @@
 #include <cpu.h>
-
 void Cpu::initializeEnvironment()
 {
     initializeOpcodeJumpTable();
@@ -7,6 +6,21 @@ void Cpu::initializeEnvironment()
 
 void Cpu::emulateCycle()
 {
+    //debug, lets try some random opcodes to see where we get
+    // opcode = 0xAFB3;
+    // (this->*opcodeJumpTable[opcode >> 8])();
+    // opcode = 0x0FB3;
+    // (this->*opcodeJumpTable[opcode >> 8])();
+    // opcode = 0x00E0;
+    // (this->*opcodeJumpTable[opcode >> 8])();
+    // opcode = 0x00EE;
+    // (this->*opcodeJumpTable[opcode >> 8])();
+    // opcode = 0x8003;
+    // (this->*opcodeJumpTable[opcode >> 8])();
+    // opcode = 0x8F7E;
+    // (this->*opcodeJumpTable[opcode >> 8])();
+    // opcode = 0xF265;
+    // (this->*opcodeJumpTable[opcode >> 8])();
 }
 
 void Cpu::mapHexRangesToOpcodeValues(const std::map<std::pair<int, int>, opcodeFunction> &opcodeHandlerMap, opcodeFunction (&jumpTable)[256])
@@ -169,50 +183,66 @@ std::map<std::pair<int, int>, Cpu::opcodeFunction> Cpu::get0xFJumpTableOpcodeMap
 void Cpu::navigateOpcode0x0JumpTable()
 {
     std::cout << "hopped into 0x0 jump table!" << std::endl;
+    (this->*opcode0x0JumpTable[opcode & 0x00FF])();
 }
 
 void Cpu::navigateOpcode0x8JumpTable()
 {
     std::cout << "hopped into 0x8 jump table!" << std::endl;
+    (this->*opcode0x8JumpTable[opcode & 0x00FF])();
 }
 
 void Cpu::navigateOpcode0xEJumpTable()
 {
     std::cout << "hopped into 0xE jump table!" << std::endl;
+    (this->*opcode0xEJumpTable[opcode & 0x00FF])();
 }
 
 void Cpu::navigateOpcode0xFJumpTable()
 {
     std::cout << "hopped into 0xF jump table!" << std::endl;
+    (this->*opcode0xFJumpTable[opcode & 0x00FF])();
 }
 
 void Cpu::noOp()
 {
     std::cout << "called noOp!" << std::endl;
+    pc += 2;
     //do nothing
 }
 
 void Cpu::opcode0x0NNN()
 {
     std::cout << "called 0x0NNN" << std::endl;
+    pc += 2;
     //not sure how this works, not implementing for now
 }
 
+//clear graphics buffer
 void Cpu::opcode0x00E0()
 {
-    std::cout << "called 0x00E0" << std::endl;
+    for (int i = 0; i < 2048; ++i) {
+        graphics[i] &= 0x00;
+    }
+
+    pc += 2;
 }
 
+//return from subroutine
 void Cpu::opcode0x00EE()
 {
-    std::cout << "called 0x00EE" << std::endl;
+    //decrement stack pointer, then assign index register to stack[stackPointer]
+    // std::cout << "called 0x00EE" << std::endl;
 }
 
+//jump to (opcode & 0x0FFF)
 void Cpu::opcode0x1NNN()
 {
-    std::cout << "called 0x1NNN" << std::endl;
+    //should this operate on address index register, or program counter?
+    // i = (opcode & 0x0FFF);
 }
 
+//call subroutine at (opcode & 0x0FFF)
 void Cpu::opcode0x2NNN()
 {
     std::cout << "called 0x2NNN" << std::endl;
