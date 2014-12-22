@@ -2,6 +2,7 @@
 #define CPU_H
 
 #include <iostream>
+#include <map>
 
 class Cpu
 {
@@ -10,6 +11,10 @@ class Cpu
     private:
         //array of opcode function pointers
         opcodeFunction opcodeJumpTable[256];
+        opcodeFunction opcode0x0JumpTable[256];
+        opcodeFunction opcode0x8JumpTable[256];
+        opcodeFunction opcode0xEJumpTable[256];
+        opcodeFunction opcode0xFJumpTable[256];
         //16-bit opcode
         unsigned short opcode;
         unsigned char memory[4096];
@@ -28,11 +33,17 @@ class Cpu
         unsigned char delayTimer;
         unsigned char soundTimer;
         
+        void mapHexRangesToOpcodeValues(const std::map<std::pair<int, int>, opcodeFunction> &opcodeHandlerMap, opcodeFunction (&jumpTable)[256]);
         void initializeOpcodeJumpTable();
-        void opcode0x0JumpTable();
-        void opcode0x8JumpTable();
-        void opcode0xEJumpTable();
-        void opcode0xFJumpTable();
+        void initialize0x0JumpTable();
+        void initialize0x8JumpTable();
+        void initialize0xEJumpTable();
+        void initialize0xFJumpTable();
+        void navigateOpcode0x0JumpTable();
+        void navigateOpcode0x8JumpTable();
+        void navigateOpcode0xEJumpTable();
+        void navigateOpcode0xFJumpTable();
+        void noOp();
         void opcode0x0NNN();
         void opcode0x00E0();
         void opcode0x00EE();
