@@ -19,9 +19,6 @@ void Cpu::mapHexRangesToOpcodeValues(const std::map<std::pair<int, int>, opcodeF
        rangeStart = it->first.first;
        rangeEnd = it->first.second;
 
-       std::cout << "rangeStart = " << rangeStart << std::endl;
-       std::cout << "rangeEnd = " << rangeEnd << std::endl;
-
        for (int i = rangeStart; i <= rangeEnd; ++i) {
            jumpTable[i] = it->second;
        }
@@ -30,7 +27,7 @@ void Cpu::mapHexRangesToOpcodeValues(const std::map<std::pair<int, int>, opcodeF
 
 void Cpu::initializeOpcodeJumpTable()
 {
-    //first, initialize each array to noOp function pointers (just to make sure everything is initialized)
+    //first, initialize each array to noOp function pointers
     std::map<std::pair<int, int>, opcodeFunction> blankOpcodeHandlerMap;
     blankOpcodeHandlerMap.insert(std::pair<std::pair<int, int>, opcodeFunction>(std::pair<int, int>(0x00, 0xFF), &Cpu::noOp));
     mapHexRangesToOpcodeValues(blankOpcodeHandlerMap, opcodeJumpTable);
@@ -39,7 +36,16 @@ void Cpu::initializeOpcodeJumpTable()
     mapHexRangesToOpcodeValues(blankOpcodeHandlerMap, opcode0xEJumpTable);
     mapHexRangesToOpcodeValues(blankOpcodeHandlerMap, opcode0xFJumpTable);
 
+    //now, fill the jump tables with their appropriate function pointers
+    mapHexRangesToOpcodeValues(getJumpTableOpcodeMap(), opcodeJumpTable);
+    mapHexRangesToOpcodeValues(get0x0JumpTableOpcodeMap(), opcode0x0JumpTable);
+    initializeOpcode0x8JumpTable();
+    mapHexRangesToOpcodeValues(get0xEJumpTableOpcodeMap(), opcode0xEJumpTable);
+    mapHexRangesToOpcodeValues(get0xFJumpTableOpcodeMap(), opcode0xFJumpTable);
+}
 
+std::map<std::pair<int, int>, Cpu::opcodeFunction> Cpu::getJumpTableOpcodeMap()
+{
     //jump table opcode handler map
     //0x00 - 0x00 &navigateOpcode0x0JumpTable   0x01 - 0x0F &opcode0x0NNN   0x10 - 0x1F &opcode0x1NNN
     //0x20 - 0x2F &opcode0x2NNN                 0x30 - 0x3F &opcode0x3XNN   0x40 - 0x4F &opcode0x4XNN
@@ -69,23 +75,83 @@ void Cpu::initializeOpcodeJumpTable()
     opcodeHandlerMap.insert(std::pair<std::pair<int, int>, opcodeFunction>(std::pair<int, int>(0xD0, 0xDF), &Cpu::opcode0xDXYN));
     opcodeHandlerMap.insert(std::pair<std::pair<int, int>, opcodeFunction>(std::pair<int, int>(0xE0, 0xEF), &Cpu::navigateOpcode0xEJumpTable));
     opcodeHandlerMap.insert(std::pair<std::pair<int, int>, opcodeFunction>(std::pair<int, int>(0xF0, 0xFF), &Cpu::navigateOpcode0xFJumpTable));
-    mapHexRangesToOpcodeValues(opcodeHandlerMap, opcodeJumpTable);
 
-    //map opcode handlers to the sub-tables
-    //0x0 opcode table
+    return opcodeHandlerMap;
+}
+
+std::map<std::pair<int, int>, Cpu::opcodeFunction> Cpu::get0x0JumpTableOpcodeMap()
+{
+    //0x00E0     - &opcode0x00E0
+    //0x00EE     - &opcode0x00EE
+    //all others - &noOp
     std::map<std::pair<int, int>, opcodeFunction> opcode0x0HandlerMap;
     opcode0x0HandlerMap.insert(std::pair<std::pair<int, int>, opcodeFunction>(std::pair<int, int>(0xE0, 0xE0), &Cpu::opcode0x00E0));
     opcode0x0HandlerMap.insert(std::pair<std::pair<int, int>, opcodeFunction>(std::pair<int, int>(0xEE, 0xEE), &Cpu::opcode0x00EE));
-    mapHexRangesToOpcodeValues(opcode0x0HandlerMap, opcode0x0JumpTable);
-    //0x8 opcode table
-    std::map<std::pair<int, int>, opcodeFunction> opcode0x8HandlerMap;
-    //TODO: figure this out, 0x8 table structured differently
-    //0xE opcode table
+
+    return opcode0x0HandlerMap;
+}
+
+void Cpu::initializeOpcode0x8JumpTable()
+{
+    //mapping here is a little weird, can't rely on mapHexRangesToOpcodeValues() to handle it
+    //basically, the least-significant nibble determines which opcodeHandler we use
+
+    //if least-significant nibble equals 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7 or 0xE, then assign the appropriate handler
+    //else, assign noOp to opcode0x8JumpTable at the current index
+    for (unsigned char i = 0; i < 255; ++i) {
+        switch (i & 0x0F) {
+            case 0x00:
+                opcode0x8JumpTable[i] = &Cpu::opcode0x8XY0;
+                break;
+            case 0x01:
+                opcode0x8JumpTable[i] = &Cpu::opcode0x8XY1;
+                break;
+            case 0x02:
+                opcode0x8JumpTable[i] = &Cpu::opcode0x8XY2;
+                break;
+            case 0x03:
+                opcode0x8JumpTable[i] = &Cpu::opcode0x8XY3;
+                break;
+            case 0x04:
+                opcode0x8JumpTable[i] = &Cpu::opcode0x8XY4;
+                break;
+            case 0x05:
+                opcode0x8JumpTable[i] = &Cpu::opcode0x8XY5;
+                break;
+            case 0x06:
+                opcode0x8JumpTable[i] = &Cpu::opcode0x8XY6;
+                break;
+            case 0x07:
+                opcode0x8JumpTable[i] = &Cpu::opcode0x8XY7;
+                break;
+            case 0x0E:
+                opcode0x8JumpTable[i] = &Cpu::opcode0x8XYE;
+                break;
+            default:
+                opcode0x8JumpTable[i] = &Cpu::noOp;
+                break;
+        }
+    }
+}
+
+std::map<std::pair<int, int>, Cpu::opcodeFunction> Cpu::get0xEJumpTableOpcodeMap()
+{
+    //0xE09E     - 0xEF9E &opcode0xEX9E
+    //0xE0A1     - 0xEFA1 &opcode0xEXA1
+    //all others - &noOp
     std::map<std::pair<int, int>, opcodeFunction> opcode0xEHandlerMap;
     opcode0xEHandlerMap.insert(std::pair<std::pair<int, int>, opcodeFunction>(std::pair<int, int>(0x9E, 0x9E), &Cpu::opcode0xEX9E));
     opcode0xEHandlerMap.insert(std::pair<std::pair<int, int>, opcodeFunction>(std::pair<int, int>(0xA1, 0xA1), &Cpu::opcode0xEXA1));
-    mapHexRangesToOpcodeValues(opcode0xEHandlerMap, opcode0xEJumpTable);
-    //0xF opcode table
+
+    return opcode0xEHandlerMap;
+}
+
+std::map<std::pair<int, int>, Cpu::opcodeFunction> Cpu::get0xFJumpTableOpcodeMap()
+{
+    //0xF007 - 0xFF07 &opcode0xFX07     0xF00A - 0xFF0A &opcode0xFX0A       0xF015 - 0xFF15 &opcode0xFX15
+    //0xF018 - 0xFF18 &opcode0xFX18     0xF01E - 0xFF1E &opcode0xFX1E       0xF029 - 0xFF29 &opcode0xFX29
+    //0xF033 - 0xFF33 &opcode0xFX33     0xF055 - 0xFF55 &opcode0xFF55       0xF065 - 0xFF65 &opcode0xFF65
+    //                                     all others - &noOp
     std::map<std::pair<int, int>, opcodeFunction> opcode0xFHandlerMap;
     opcode0xFHandlerMap.insert(std::pair<std::pair<int, int>, opcodeFunction>(std::pair<int, int>(0x07, 0x07), &Cpu::opcode0xFX07));
     opcode0xFHandlerMap.insert(std::pair<std::pair<int, int>, opcodeFunction>(std::pair<int, int>(0x0A, 0x0A), &Cpu::opcode0xFX0A));
@@ -96,33 +162,8 @@ void Cpu::initializeOpcodeJumpTable()
     opcode0xFHandlerMap.insert(std::pair<std::pair<int, int>, opcodeFunction>(std::pair<int, int>(0x33, 0x33), &Cpu::opcode0xFX33));
     opcode0xFHandlerMap.insert(std::pair<std::pair<int, int>, opcodeFunction>(std::pair<int, int>(0x55, 0x55), &Cpu::opcode0xFX55));
     opcode0xFHandlerMap.insert(std::pair<std::pair<int, int>, opcodeFunction>(std::pair<int, int>(0x65, 0x65), &Cpu::opcode0xFX65));
-    mapHexRangesToOpcodeValues(opcode0xFHandlerMap, opcode0xFJumpTable);
-}
 
-void Cpu::initialize0x0JumpTable()
-{
-    // for (int i = 0; i < 256; i++) {
-    //     if (i == 0xE0) {
-    //         opcode0x0JumpTable[i] = &Cpu::opcode0x00E0;
-    //     } else if (i == 0xEE) {
-    //         opcode0x0JumpTable[i] = &Cpu::opcode0x00EE;
-    //     } else {
-    //         opcode0x0JumpTable[i] = &Cpu::noOp;
-    //     }
-    // }
-}
-
-void Cpu::initialize0x8JumpTable()
-{
-
-}
-
-void Cpu::initialize0xEJumpTable()
-{
-}
-
-void Cpu::initialize0xFJumpTable()
-{
+    return opcode0xFHandlerMap;
 }
 
 void Cpu::navigateOpcode0x0JumpTable()

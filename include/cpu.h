@@ -35,10 +35,11 @@ class Cpu
         
         void mapHexRangesToOpcodeValues(const std::map<std::pair<int, int>, opcodeFunction> &opcodeHandlerMap, opcodeFunction (&jumpTable)[256]);
         void initializeOpcodeJumpTable();
-        void initialize0x0JumpTable();
-        void initialize0x8JumpTable();
-        void initialize0xEJumpTable();
-        void initialize0xFJumpTable();
+        std::map<std::pair<int, int>, opcodeFunction> getJumpTableOpcodeMap();
+        std::map<std::pair<int, int>, opcodeFunction> get0x0JumpTableOpcodeMap();
+        void initializeOpcode0x8JumpTable();
+        std::map<std::pair<int, int>, opcodeFunction> get0xEJumpTableOpcodeMap();
+        std::map<std::pair<int, int>, opcodeFunction> get0xFJumpTableOpcodeMap();
         void navigateOpcode0x0JumpTable();
         void navigateOpcode0x8JumpTable();
         void navigateOpcode0xEJumpTable();
