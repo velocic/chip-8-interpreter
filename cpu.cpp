@@ -6,21 +6,6 @@ void Cpu::initializeEnvironment()
 
 void Cpu::emulateCycle()
 {
-    //debug, lets try some random opcodes to see where we get
-    // opcode = 0xAFB3;
-    // (this->*opcodeJumpTable[opcode >> 8])();
-    // opcode = 0x0FB3;
-    // (this->*opcodeJumpTable[opcode >> 8])();
-    // opcode = 0x00E0;
-    // (this->*opcodeJumpTable[opcode >> 8])();
-    // opcode = 0x00EE;
-    // (this->*opcodeJumpTable[opcode >> 8])();
-    // opcode = 0x8003;
-    // (this->*opcodeJumpTable[opcode >> 8])();
-    // opcode = 0x8F7E;
-    // (this->*opcodeJumpTable[opcode >> 8])();
-    // opcode = 0xF265;
-    // (this->*opcodeJumpTable[opcode >> 8])();
 }
 
 void Cpu::mapHexRangesToOpcodeValues(const std::map<std::pair<int, int>, opcodeFunction> &opcodeHandlerMap, opcodeFunction (&jumpTable)[256])
@@ -206,16 +191,16 @@ void Cpu::navigateOpcode0xFJumpTable()
 
 void Cpu::noOp()
 {
+    //do nothing. if we got here, something went wrong or the source
+    //binary called an invalid operation
     std::cout << "called noOp!" << std::endl;
     pc += 2;
-    //do nothing
 }
 
+//apparently obsolete (outside of running on ancient hardware)
 void Cpu::opcode0x0NNN()
 {
-    std::cout << "called 0x0NNN" << std::endl;
     pc += 2;
-    //not sure how this works, not implementing for now
 }
 
 //clear graphics buffer
@@ -231,55 +216,84 @@ void Cpu::opcode0x00E0()
 //return from subroutine
 void Cpu::opcode0x00EE()
 {
-    //decrement stack pointer, then assign index register to stack[stackPointer]
-    // std::cout << "called 0x00EE" << std::endl;
+    pc = stack[stackPointer];
+    --stackPointer;
 }
 
 //jump to (opcode & 0x0FFF)
 void Cpu::opcode0x1NNN()
 {
-    //should this operate on address index register, or program counter?
-    // i = (opcode & 0x0FFF);
+    pc = (opcode & 0x0FFF);
 }
 
 //call subroutine at (opcode & 0x0FFF)
 void Cpu::opcode0x2NNN()
 {
-    std::cout << "called 0x2NNN" << std::endl;
+    stack[stackPointer] = pc;
+    ++stackPointer;
+    pc = (opcode & 0x0FFF);
 }
+
+//skip next instruction if Vx == NN
 void Cpu::opcode0x3XNN()
 {
-    std::cout << "called 0x3XNN" << std::endl;
+    if (v[(opcode & 0x0F00) >> 8] == (opcode & 0x00FF)) {
+        pc += 2;
+    }
+
+    pc += 2;
 }
 
+//skip next instruction if Vx != NN
 void Cpu::opcode0x4XNN()
 {
-    std::cout << "called 0x4XNN" << std::endl;
+    if (v[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF)) {
+        pc += 2;
+    }
+
+    pc += 2;
 }
 
+//skip next instruction if Vx == Vy
 void Cpu::opcode0x5XY0()
 {
-    std::cout << "called 0x5XY0" << std::endl;
+    if (v[(opcode & 0x0F00 >> 8)] == v[(opcode & 0x00F0) >> 4]) {
+        pc += 2;
+    }
+
+    pc += 2;
 }
 
+//load NN into Vx
 void Cpu::opcode0x6XNN()
 {
-    std::cout << "called 0x6XNN" << std::endl;
+    v[(opcode & 0x0F00) >> 8] = opcode & 0x00FF;
+
+    pc += 2;
 }
 
+//add NN to Vx, store result in Vx (doesn't set carry flag)
 void Cpu::opcode0x7XNN()
 {
-    std::cout << "called 0x7XNN" << std::endl;
+    v[(opcode & 0x0F00) >> 8] += (opcode & 0x00FF);
+
+    pc += 2;
 }
 
+//store Vy into Vx
 void Cpu::opcode0x8XY0()
 {
-    std::cout << "called 0x8XY0" << std::endl;
+    v[(opcode & 0x0F00) >> 8] = v[(opcode & 0x00F0) >> 4];
+
+    pc += 2;
 }
 
+//OR Vx w/ Vy, store result in Vx
 void Cpu::opcode0x8XY1()
 {
-    std::cout << "called 0x8XY1" << std::endl;
+    v[(opcode & 0x0F00) >> 8] |= v[(opcode & 0x00F0) >> 4];
+
+    pc += 2;
 }
 
 void Cpu::opcode0x8XY2()
