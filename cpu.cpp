@@ -167,25 +167,21 @@ std::map<std::pair<int, int>, Cpu::opcodeFunction> Cpu::get0xFJumpTableOpcodeMap
 
 void Cpu::navigateOpcode0x0JumpTable()
 {
-    std::cout << "hopped into 0x0 jump table!" << std::endl;
     (this->*opcode0x0JumpTable[opcode & 0x00FF])();
 }
 
 void Cpu::navigateOpcode0x8JumpTable()
 {
-    std::cout << "hopped into 0x8 jump table!" << std::endl;
     (this->*opcode0x8JumpTable[opcode & 0x00FF])();
 }
 
 void Cpu::navigateOpcode0xEJumpTable()
 {
-    std::cout << "hopped into 0xE jump table!" << std::endl;
     (this->*opcode0xEJumpTable[opcode & 0x00FF])();
 }
 
 void Cpu::navigateOpcode0xFJumpTable()
 {
-    std::cout << "hopped into 0xF jump table!" << std::endl;
     (this->*opcode0xFJumpTable[opcode & 0x00FF])();
 }
 
@@ -296,56 +292,119 @@ void Cpu::opcode0x8XY1()
     pc += 2;
 }
 
+//AND Vx w/ Vy, store result in Vx
 void Cpu::opcode0x8XY2()
 {
-    std::cout << "called 0x8XY2" << std::endl;
+    v[(opcode & 0x0F00) >> 8] &= v[(opcode & 0x00F0) >> 4];
+
+    pc += 2;
 }
 
+//XOR Vx w/ Vy, store result in Vx
 void Cpu::opcode0x8XY3()
 {
-    std::cout << "called 0x8XY3" << std::endl;
+    v[(opcode & 0x0F00) >> 8] ^= v[(opcode & 0x00F0) >> 4];
+
+    pc += 2;
 }
 
+//add Vy to Vx, store result in Vx. If result > 255, set v[0xF] to 1, else set v[0xF] to 0 (carry flag)
 void Cpu::opcode0x8XY4()
 {
-    std::cout << "called 0x8XY4" << std::endl;
+    //if Vy > (255 - Vx), we will overflow 1 byte, so set the carry flag to 1
+    if (v[(opcode & 0x00F0) >> 4] > (0xFF - v[(opcode & 0x0F00) >> 8])) {
+        v[0xF] = 1;
+    } else {
+        v[0xF] = 0;
+    }
+
+    v[(opcode & 0x0F00) >> 8] += v[(opcode & 0x00F0) >> 4];
+
+    pc += 2;
 }
 
+//if Vx > Vy, set v[0xF] to 1, else set v[0xF] to 0. then, Vx = Vx - Vy
 void Cpu::opcode0x8XY5()
 {
-    std::cout << "called 0x8XY5" << std::endl;
+    if (v[(opcode & 0x0F00) >> 8] > v[(opcode & 0x00F0) >> 4]) {
+        v[0xF] = 1;
+    } else {
+        v[0xF] = 0;
+    }
+
+    v[(opcode & 0x0F00) >> 8] -= v[(opcode & 0x00F0) >> 4];
+
+    pc += 2;
 }
 
+// if least-significant bit of Vx is 1, set v[0xF] to 1, else set it to 0.
+// then, divide by 2
 void Cpu::opcode0x8XY6()
 {
-    std::cout << "called 0x8XY6" << std::endl;
+    if ((v[(opcode & 0x0F00) >> 8] & 0x01) == 0x01) {
+        v[0xF] = 1;
+    } else {
+        v[0xF] = 0;
+    }
+
+    v[(opcode & 0x0F00) >> 8] >>= 1;
+
+    pc += 2;
 }
 
+//if Vy > Vx, set v[0xF] to 1, else set to 0. Then Vx = Vy - Vx
 void Cpu::opcode0x8XY7()
 {
-    std::cout << "called 0x8XY7" << std::endl;
+    if (v[(opcode & 0x00F0) >> 4] > v[(opcode & 0x0F00) >> 8]) {
+        v[0xF] = 1;
+    } else {
+        v[0xF] = 0;
+    }
+
+    v[(opcode & 0x0F00) >> 8] = (v[(opcode & 0x00F0) >> 4] - v[(opcode & 0x0F00) >> 8]);
+
+    pc += 2;
 }
 
+//if most-significant bit of Vx is 1, set v[0xF] to 1. else, set it to 0. Then, multiply Vx by 2
 void Cpu::opcode0x8XYE()
 {
-    std::cout << "called 0x8XYE" << std::endl;
+    if ((v[(opcode & 0x0F00) >> 8] >> 7) == 0x01) {
+        v[0xF] = 1;
+    } else {
+        v[0xF] = 0;
+    }
+
+    v[(opcode & 0x0F00) >> 8] = (v[opcode & 0x0F00] << 1);
+
+    pc += 2;
 }
 
+//skip next instruction if Vx != Vy
 void Cpu::opcode0x9XY0()
 {
-    std::cout << "called 0x9XY0" << std::endl;
+    if (v[(opcode & 0x0F00) >> 8] != v[(opcode & 0x00F0) >> 4]) {
+        pc += 2;
+    }
+
+    pc += 2;
 }
 
+//set index register i to NNN
 void Cpu::opcode0xANNN()
 {
-    std::cout << "called 0xANNN" << std::endl;
+    i = (opcode & 0x0FFF);
+
+    pc += 2;
 }
 
+//set pc to NNN + v[0x0]
 void Cpu::opcode0xBNNN()
 {
-    std::cout << "called 0xBNNN" << std::endl;
+    pc = (opcode & 0x0FFF) + v[0x0];
 }
 
+//generate random number between 0 and 255, AND it with NN, then save the result in Vx
 void Cpu::opcode0xCXNN()
 {
     std::cout << "called 0xCXNN" << std::endl;
