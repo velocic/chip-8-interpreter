@@ -2,26 +2,26 @@
 void Cpu::initializeEnvironment()
 {
     initializeOpcodeJumpTable();
+    initializeRandomNumberGenerator();
+
+    //TEST DEBUG STUFF
+    // opcode = 0xF533;
+    // v[0x5] = 185;
+    // (this->*opcodeJumpTable[opcode >> 8])();
 }
 
 void Cpu::emulateCycle()
 {
 }
 
-void Cpu::mapHexRangesToOpcodeValues(const std::map<std::pair<int, int>, opcodeFunction> &opcodeHandlerMap, opcodeFunction (&jumpTable)[256])
+bool Cpu::getDrawFlag()
 {
-    int rangeStart;
-    int rangeEnd;
-    //iterate through the map grabbing each range of values
-    //and the corresponding opcode hanlder to assign to the range
-    for (auto it = opcodeHandlerMap.begin(); it != opcodeHandlerMap.end(); ++it) {
-       rangeStart = it->first.first;
-       rangeEnd = it->first.second;
+    return drawFlag;
+}
 
-       for (int i = rangeStart; i <= rangeEnd; ++i) {
-           jumpTable[i] = it->second;
-       }
-    }
+void Cpu::resetDrawFlag()
+{
+    drawFlag = false;
 }
 
 void Cpu::initializeOpcodeJumpTable()
@@ -42,6 +42,32 @@ void Cpu::initializeOpcodeJumpTable()
     mapHexRangesToOpcodeValues(get0xEJumpTableOpcodeMap(), opcode0xEJumpTable);
     mapHexRangesToOpcodeValues(get0xFJumpTableOpcodeMap(), opcode0xFJumpTable);
 }
+
+void Cpu::initializeRandomNumberGenerator()
+{
+    auto seed = std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
+    
+    rng = std::mt19937(seed);
+    uniformDist = std::uniform_int_distribution<unsigned short>(0, 255);
+}
+
+
+void Cpu::mapHexRangesToOpcodeValues(const std::map<std::pair<int, int>, opcodeFunction> &opcodeHandlerMap, opcodeFunction (&jumpTable)[256])
+{
+    int rangeStart;
+    int rangeEnd;
+    //iterate through the map grabbing each range of values
+    //and the corresponding opcode hanlder to assign to the range
+    for (auto it = opcodeHandlerMap.begin(); it != opcodeHandlerMap.end(); ++it) {
+       rangeStart = it->first.first;
+       rangeEnd = it->first.second;
+
+       for (int i = rangeStart; i <= rangeEnd; ++i) {
+           jumpTable[i] = it->second;
+       }
+    }
+}
+
 
 std::map<std::pair<int, int>, Cpu::opcodeFunction> Cpu::getJumpTableOpcodeMap()
 {
@@ -190,13 +216,13 @@ void Cpu::noOp()
     //do nothing. if we got here, something went wrong or the source
     //binary called an invalid operation
     std::cout << "called noOp!" << std::endl;
-    pc += 2;
+    programCounter += 2;
 }
 
 //apparently obsolete (outside of running on ancient hardware)
 void Cpu::opcode0x0NNN()
 {
-    pc += 2;
+    programCounter += 2;
 }
 
 //clear graphics buffer
@@ -206,20 +232,22 @@ void Cpu::opcode0x00E0()
         graphics[i] &= 0x00;
     }
 
-    pc += 2;
+    drawFlag = true;
+
+    programCounter += 2;
 }
 
 //return from subroutine
 void Cpu::opcode0x00EE()
 {
-    pc = stack[stackPointer];
+    programCounter = stack[stackPointer];
     --stackPointer;
 }
 
 //jump to (opcode & 0x0FFF)
 void Cpu::opcode0x1NNN()
 {
-    pc = (opcode & 0x0FFF);
+    programCounter = (opcode & 0x0FFF);
 }
 
 //call subroutine at (opcode & 0x0FFF)
@@ -227,37 +255,37 @@ void Cpu::opcode0x2NNN()
 {
     stack[stackPointer] = pc;
     ++stackPointer;
-    pc = (opcode & 0x0FFF);
+    programCounter = (opcode & 0x0FFF);
 }
 
 //skip next instruction if Vx == NN
 void Cpu::opcode0x3XNN()
 {
     if (v[(opcode & 0x0F00) >> 8] == (opcode & 0x00FF)) {
-        pc += 2;
+        programCounter += 2;
     }
 
-    pc += 2;
+    programCounter += 2;
 }
 
 //skip next instruction if Vx != NN
 void Cpu::opcode0x4XNN()
 {
     if (v[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF)) {
-        pc += 2;
+        programCounter += 2;
     }
 
-    pc += 2;
+    programCounter += 2;
 }
 
 //skip next instruction if Vx == Vy
 void Cpu::opcode0x5XY0()
 {
-    if (v[(opcode & 0x0F00 >> 8)] == v[(opcode & 0x00F0) >> 4]) {
-        pc += 2;
+    if (v[(opcode & 0x0F00) >> 8] == v[(opcode & 0x00F0) >> 4]) {
+        programCounter += 2;
     }
 
-    pc += 2;
+    programCounter += 2;
 }
 
 //load NN into Vx
@@ -265,7 +293,7 @@ void Cpu::opcode0x6XNN()
 {
     v[(opcode & 0x0F00) >> 8] = opcode & 0x00FF;
 
-    pc += 2;
+    programCounter += 2;
 }
 
 //add NN to Vx, store result in Vx (doesn't set carry flag)
@@ -273,7 +301,7 @@ void Cpu::opcode0x7XNN()
 {
     v[(opcode & 0x0F00) >> 8] += (opcode & 0x00FF);
 
-    pc += 2;
+    programCounter += 2;
 }
 
 //store Vy into Vx
@@ -281,7 +309,7 @@ void Cpu::opcode0x8XY0()
 {
     v[(opcode & 0x0F00) >> 8] = v[(opcode & 0x00F0) >> 4];
 
-    pc += 2;
+    programCounter += 2;
 }
 
 //OR Vx w/ Vy, store result in Vx
@@ -289,7 +317,7 @@ void Cpu::opcode0x8XY1()
 {
     v[(opcode & 0x0F00) >> 8] |= v[(opcode & 0x00F0) >> 4];
 
-    pc += 2;
+    programCounter += 2;
 }
 
 //AND Vx w/ Vy, store result in Vx
@@ -297,7 +325,7 @@ void Cpu::opcode0x8XY2()
 {
     v[(opcode & 0x0F00) >> 8] &= v[(opcode & 0x00F0) >> 4];
 
-    pc += 2;
+    programCounter += 2;
 }
 
 //XOR Vx w/ Vy, store result in Vx
@@ -305,7 +333,7 @@ void Cpu::opcode0x8XY3()
 {
     v[(opcode & 0x0F00) >> 8] ^= v[(opcode & 0x00F0) >> 4];
 
-    pc += 2;
+    programCounter += 2;
 }
 
 //add Vy to Vx, store result in Vx. If result > 255, set v[0xF] to 1, else set v[0xF] to 0 (carry flag)
@@ -320,7 +348,7 @@ void Cpu::opcode0x8XY4()
 
     v[(opcode & 0x0F00) >> 8] += v[(opcode & 0x00F0) >> 4];
 
-    pc += 2;
+    programCounter += 2;
 }
 
 //if Vx > Vy, set v[0xF] to 1, else set v[0xF] to 0. then, Vx = Vx - Vy
@@ -334,7 +362,7 @@ void Cpu::opcode0x8XY5()
 
     v[(opcode & 0x0F00) >> 8] -= v[(opcode & 0x00F0) >> 4];
 
-    pc += 2;
+    programCounter += 2;
 }
 
 // if least-significant bit of Vx is 1, set v[0xF] to 1, else set it to 0.
@@ -349,7 +377,7 @@ void Cpu::opcode0x8XY6()
 
     v[(opcode & 0x0F00) >> 8] >>= 1;
 
-    pc += 2;
+    programCounter += 2;
 }
 
 //if Vy > Vx, set v[0xF] to 1, else set to 0. Then Vx = Vy - Vx
@@ -363,7 +391,7 @@ void Cpu::opcode0x8XY7()
 
     v[(opcode & 0x0F00) >> 8] = (v[(opcode & 0x00F0) >> 4] - v[(opcode & 0x0F00) >> 8]);
 
-    pc += 2;
+    programCounter += 2;
 }
 
 //if most-significant bit of Vx is 1, set v[0xF] to 1. else, set it to 0. Then, multiply Vx by 2
@@ -377,95 +405,151 @@ void Cpu::opcode0x8XYE()
 
     v[(opcode & 0x0F00) >> 8] = (v[opcode & 0x0F00] << 1);
 
-    pc += 2;
+    programCounter += 2;
 }
 
 //skip next instruction if Vx != Vy
 void Cpu::opcode0x9XY0()
 {
     if (v[(opcode & 0x0F00) >> 8] != v[(opcode & 0x00F0) >> 4]) {
-        pc += 2;
+        programCounter += 2;
     }
 
-    pc += 2;
+    programCounter += 2;
 }
 
-//set index register i to NNN
+//set index register to NNN
 void Cpu::opcode0xANNN()
 {
-    i = (opcode & 0x0FFF);
+    index = (opcode & 0x0FFF);
 
-    pc += 2;
+    programCounter += 2;
 }
 
 //set pc to NNN + v[0x0]
 void Cpu::opcode0xBNNN()
 {
-    pc = (opcode & 0x0FFF) + v[0x0];
+    programCounter = (opcode & 0x0FFF) + v[0x0];
 }
 
 //generate random number between 0 and 255, AND it with NN, then save the result in Vx
 void Cpu::opcode0xCXNN()
 {
-    std::cout << "called 0xCXNN" << std::endl;
+    v[(opcode & 0x0F00) >> 8] = (opcode & 0x00FF) & uniformDist(rng);
+
+    programCounter += 2;
 }
 
+/* Note: This explanation comes from Cowgod's Chip-8 Technical Reference v1.0 verbatim.
+ * The interpreter reads n bytes from memory, starting at the address stored in I. These bytes are then displayed as 
+ * sprites on screen at coordinates (Vx, Vy). Sprites are XORed onto the existing screen. If this causes any pixels
+ * to be erased, VF is set to 1, otherwise it is set to 0. If the sprite is positioned so part of it is outside the
+ * coordinates of the display, it wraps around to the opposite side of the screen. See instruction 8xy3 for more
+ * information on XOR, and section 2.4, Display, for more information on the Chip-8 screen and sprites.
+ */
 void Cpu::opcode0xDXYN()
 {
+    //TODO: place sprite into graphics buffer
+    drawFlag = true;
+    programCounter += 2;
     std::cout << "called 0xDXYN" << std::endl;
 }
 
+//if the key corresponding to Vx is pressed, skip next instruction
 void Cpu::opcode0xEX9E()
 {
+    //TODO: figure out a good way to get user input into this function
     std::cout << "called 0xEX9E" << std::endl;
 }
 
+//if the key corresponding to Vx is NOT pressed, skip next instruction
 void Cpu::opcode0xEXA1()
 {
+    //TODO: figure out a good way to get user input into this function
     std::cout << "called 0xEXA1" << std::endl;
 }
 
+//set Vx to the value of the delay timer
 void Cpu::opcode0xFX07()
 {
-    std::cout << "called 0xFX07" << std::endl;
+    v[(opcode & 0x0F00) >> 8] = delayTimer;
+
+    programCounter += 2;
 }
 
+//wait for a key press, then store the key's value in Vx
 void Cpu::opcode0xFX0A()
 {
+    //TODO: figure out a good way to get user input into this function
     std::cout << "called 0xFX0A" << std::endl;
 }
 
+//set the delay timer to Vx
 void Cpu::opcode0xFX15()
 {
-    std::cout << "called 0xFX15" << std::endl;
+    //TODO: need to count the timer down somehow
+    delayTimer = v[(opcode & 0x0F00) >> 8];
+
+    programCounter += 2;
 }
 
+//set the sound timer to Vx
 void Cpu::opcode0xFX18()
 {
-    std::cout << "called 0xFX18" << std::endl;
+    //TODO: need to count the timer down somehow
+    soundTimer = v[(opcode & 0x0F00) >> 8];
+
+    programCounter += 2;
 }
 
+//add index and Vx, store result in index
 void Cpu::opcode0xFX1E()
 {
-    std::cout << "called 0xFX1E" << std::endl;
+    index += v[(opcode & 0x0F00) >> 8];
+
+    programCounter += 2;
 }
 
+//set i to the location of the sprite for digit Vx
 void Cpu::opcode0xFX29()
 {
+    //TODO: implement after setting character set into memory
     std::cout << "called 0xFX29" << std::endl;
 }
 
+//store binary-coded decimal representation of Vx in memory locations i, i+1. and i+2
 void Cpu::opcode0xFX33()
 {
-    std::cout << "called 0xFX33" << std::endl;
+    int registerValue = v[(opcode & 0x0F00) >> 8];
+    int leastSignificantDigit = 0;
+
+    for (int i = 2; i >= 0; --i) {
+        leastSignificantDigit = registerValue % 10;
+        registerValue -= leastSignificantDigit;
+        registerValue /= 10;
+
+        memory[index + i] = leastSignificantDigit;
+    }
+
+    programCounter += 2;
 }
 
+//store registers V0 - Vx in memory starting at index
 void Cpu::opcode0xFX55()
 {
-    std::cout << "called 0xFX55" << std::endl;
+    for (int i = 0; i <= ((opcode & 0x0F00) >> 8); ++i) {
+        memory[index + i] = v[i];
+    }
+
+    programCounter += 2;
 }
 
+//read memory starting at index into registers V0 - Vx
 void Cpu::opcode0xFX65()
 {
-    std::cout << "called 0xFX65" << std::endl;
+    for (int i = 0; i <= ((opcode & 0x0F00) >> 8); ++i) {
+        v[i] = memory[index + i];
+    }
+
+    programCounter += 2;
 }

@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <map>
+#include <random>
+#include <chrono>
 
 class Cpu
 {
@@ -21,13 +23,17 @@ class Cpu
         unsigned short stackPointer;
         unsigned char keypad[16]; //supports 16 keys (0x0 - 0xF)
         unsigned char v[16]; //1-byte registers
-        unsigned short i; //2-byte address index register
-        unsigned short pc; //2-byte program counter
+        unsigned short index; //2-byte address index register
+        unsigned short programCounter; //2-byte program counter
         unsigned char delayTimer; //1-byte delay timer
         unsigned char soundTimer; //1-byte sound timer
+        std::mt19937 rng;
+        std::uniform_int_distribution<unsigned short> uniformDist;
+        bool drawFlag = false;
         
-        void mapHexRangesToOpcodeValues(const std::map<std::pair<int, int>, opcodeFunction> &opcodeHandlerMap, opcodeFunction (&jumpTable)[256]);
         void initializeOpcodeJumpTable();
+        void initializeRandomNumberGenerator();
+        void mapHexRangesToOpcodeValues(const std::map<std::pair<int, int>, opcodeFunction> &opcodeHandlerMap, opcodeFunction (&jumpTable)[256]);
         std::map<std::pair<int, int>, opcodeFunction> getJumpTableOpcodeMap();
         std::map<std::pair<int, int>, opcodeFunction> get0x0JumpTableOpcodeMap();
         void initializeOpcode0x8JumpTable();
@@ -77,6 +83,8 @@ class Cpu
         Cpu() {};
         void initializeEnvironment();
         void emulateCycle();
+        bool getDrawFlag();
+        void resetDrawFlag();
 };
 
 #endif
