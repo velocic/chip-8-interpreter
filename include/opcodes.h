@@ -1,12 +1,12 @@
-#ifndef CPU_H
-#define CPU_H
+#ifndef OPCODES_H
+#define OPCODES_H
 
-#include <iostream>
+#include <chrono>
 #include <map>
 #include <random>
-#include <chrono>
+#include <memory.h>
 
-class Cpu
+class OpcodeTable
 {
     typedef void (Cpu::*opcodeFunction)();
 
@@ -16,21 +16,10 @@ class Cpu
         opcodeFunction opcode0x8JumpTable[256];
         opcodeFunction opcode0xEJumpTable[256];
         opcodeFunction opcode0xFJumpTable[256];
-        unsigned short opcode; //unsigned short = 2-bytes
-        unsigned char memory[4096];
-        unsigned char graphics[2048]; //64 pixels * 32 pixels
-        unsigned short stack[16];
-        unsigned short stackPointer;
-        unsigned char keypad[16]; //supports 16 keys (0x0 - 0xF)
-        unsigned char v[16]; //1-byte registers
-        unsigned short index; //2-byte address index register
-        unsigned short programCounter; //2-byte program counter
-        unsigned char delayTimer; //1-byte delay timer
-        unsigned char soundTimer; //1-byte sound timer
         std::mt19937 rng;
         std::uniform_int_distribution<unsigned short> uniformDist;
         bool drawFlag = false;
-        
+
         void initializeOpcodeJumpTable();
         void initializeRandomNumberGenerator();
         void mapHexRangesToOpcodeValues(const std::map<std::pair<int, int>, opcodeFunction> &opcodeHandlerMap, opcodeFunction (&jumpTable)[256]);
@@ -80,11 +69,10 @@ class Cpu
         void opcode0xFX55();
         void opcode0xFX65();
     public:
-        Cpu(OpcodeTable opcodeTable, Memory memory) {};
-        void initializeEnvironment();
-        void emulateCycle();
+        OpcodeTable() {};
+        void setMemory(Memory &);
         bool getDrawFlag();
         void resetDrawFlag();
-};
+}
 
 #endif

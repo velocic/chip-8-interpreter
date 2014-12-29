@@ -3,11 +3,6 @@ void Cpu::initializeEnvironment()
 {
     initializeOpcodeJumpTable();
     initializeRandomNumberGenerator();
-
-    //TEST DEBUG STUFF
-    // opcode = 0xF533;
-    // v[0x5] = 185;
-    // (this->*opcodeJumpTable[opcode >> 8])();
 }
 
 void Cpu::emulateCycle()
