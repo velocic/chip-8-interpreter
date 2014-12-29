@@ -15,11 +15,14 @@ class Memory
         unsigned short programCounter; //2-byte program counter
         unsigned char delayTimer; //1-byte delay timer
         unsigned char soundTimer; //1-byte sound timer
-        //bool drawFlag = false;
+        bool drawFlag = false;
     public:
         void stackPush(unsigned char &);
         unsigned char stackPop();
         void advanceToNextInstruction();
+        unsigned short fetchOpcode();
+        bool getDrawFlag();
+        void resetDrawFlag();
 }
 
 #endif

@@ -11,6 +11,7 @@ class OpcodeTable
     typedef void (Cpu::*opcodeFunction)();
 
     private:
+        Memory &memory;
         opcodeFunction opcodeJumpTable[256]; //arrays of opcode function pointers
         opcodeFunction opcode0x0JumpTable[256];
         opcodeFunction opcode0x8JumpTable[256];
@@ -18,7 +19,6 @@ class OpcodeTable
         opcodeFunction opcode0xFJumpTable[256];
         std::mt19937 rng;
         std::uniform_int_distribution<unsigned short> uniformDist;
-        bool drawFlag = false;
 
         void initializeOpcodeJumpTable();
         void initializeRandomNumberGenerator();
@@ -71,8 +71,7 @@ class OpcodeTable
     public:
         OpcodeTable() {};
         void setMemory(Memory &);
-        bool getDrawFlag();
-        void resetDrawFlag();
+        void decodeAndExecuteOpcode(const unsigned short &opcode);
 }
 
 #endif
