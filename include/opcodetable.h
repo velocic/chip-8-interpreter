@@ -8,7 +8,7 @@
 
 class OpcodeTable
 {
-    typedef void (Cpu::*opcodeFunction)();
+    typedef void (OpcodeTable::*opcodeFunction)();
 
     private:
         Memory &memory;
@@ -69,7 +69,7 @@ class OpcodeTable
         void opcode0xFX55();
         void opcode0xFX65();
     public:
-        OpcodeTable() {};
+        OpcodeTable();
         void setMemory(Memory &);
         void decodeAndExecuteOpcode(const unsigned short &opcode);
 }

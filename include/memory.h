@@ -17,12 +17,19 @@ class Memory
         unsigned char soundTimer; //1-byte sound timer
         bool drawFlag = false;
     public:
-        void stackPush(unsigned char &);
-        unsigned char stackPop();
+        Memory();
         void advanceToNextInstruction();
-        unsigned short fetchOpcode();
+        void fetchOpcode();
+        void flushGraphics();
+        unsigned short getCurrentOpcode();
         bool getDrawFlag();
-        void resetDrawFlag();
+        unsigned short getProgramCounter();
+        bool registerEquals(unsigned char registerX, unsigned char constant);
+        bool registersEqual(unsigned char register1, unsigned char register2);
+        void setDrawFlag(bool drawFlag);
+        void setProgramCounter(unsigned short newCounter);
+        unsigned short stackPop();
+        void stackPush(unsigned short value);
 }
 
 #endif
