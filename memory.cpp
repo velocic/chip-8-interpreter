@@ -35,9 +35,26 @@ unsigned short Memory::getProgramCounter()
     return programCounter;
 }
 
-bool registersEqual(unsigned char register1, unsigned char register2)
+unsigned char Memory::getRegister(unsigned char registerX)
 {
-    if (v[register1] == v[register2]) {
+    //TODO: handle case of invalid register specified
+    return v[registerX];
+}
+
+bool Memory::registerEquals(unsigned char registerX, unsigned char constant)
+{
+    //TODO: handle case of invalid register being passed, or when constant > 12-bit max
+    if (v[registerX] == constant) {
+        return true;
+    }
+
+    return false;
+}
+
+bool Memory::registersEqual(unsigned char registerX, unsigned char registerY)
+{
+    //TODO: handle case of invalid registers being passed
+    if (v[registerX] == v[registerY]) {
         return true;
     }
 
@@ -52,6 +69,12 @@ void Memory::setDrawFlag(bool flag)
 void Memory::setProgramCounter(unsigned short address)
 {
     programCounter = address;
+}
+
+void Memory::setRegister(unsigned char registerX, unsigned char value)
+{
+    //TODO: handle case of invalid register specified
+    v[registerX] = value;
 }
 
 unsigned short Memory::stackPop()

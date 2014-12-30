@@ -12,7 +12,7 @@ class Cpu
         OpcodeTable opcodeTable;
         Memory memory;
     public:
-        Cpu(OpcodeTable opcodeTable, Memory memory) {};
+        Cpu(OpcodeTable opcodeTable, Memory memory) : opcodeTable(opcodeTable), memory(memory) {};
         void initializeEnvironment();
         void emulateCycle();
 };

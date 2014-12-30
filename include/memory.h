@@ -24,10 +24,12 @@ class Memory
         unsigned short getCurrentOpcode();
         bool getDrawFlag();
         unsigned short getProgramCounter();
+        unsigned char getRegister(unsigned char registerX);
         bool registerEquals(unsigned char registerX, unsigned char constant);
-        bool registersEqual(unsigned char register1, unsigned char register2);
+        bool registersEqual(unsigned char registerX, unsigned char registerY);
         void setDrawFlag(bool drawFlag);
         void setProgramCounter(unsigned short newCounter);
+        void setRegister(unsigned char registerX, unsigned char value);
         unsigned short stackPop();
         void stackPush(unsigned short value);
 }

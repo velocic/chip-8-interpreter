@@ -190,9 +190,10 @@ void OpcodeTable::navigateOpcode0xFJumpTable()
 
 void OpcodeTable::noOp()
 {
-    //do nothing. if we got here, something went wrong or the source
-    //binary called an invalid operation
-    std::cout << "called noOp!" << std::endl;
+    /*TODO: log warning if we get into this function. If this gets called, we
+     * either navigated the opcode table incorrectly, or the rom file called
+     * an invalid entry of the table
+     */
     memory.advanceToNextInstruction();
 }
 
@@ -232,100 +233,134 @@ void OpcodeTable::opcode0x2NNN()
 //skip next instruction if Vx == NN
 void OpcodeTable::opcode0x3XNN()
 {
-    // if (memory.registerEquals()) {
-    //     memory.advanceToNextInstruction();
-    // }
-    //
-    // memory.advanceToNextInstruction();
+    unsigned short opcode = memory.getCurrentOpcode();
+    unsigned char x = (opcode & 0x0F00) >> 8;
+    unsigned char nn = opcode & 0x00FF;
 
-    // if (v[(opcode & 0x0F00) >> 8] == (opcode & 0x00FF)) {
-    //     programCounter += 2;
-    // }
-    //
-    // programCounter += 2;
+    if (memory.registerEquals(x, nn)) {
+        memory.advanceToNextInstruction();
+    }
+
+    memory.advanceToNextInstruction();
 }
 
 //skip next instruction if Vx != NN
 void OpcodeTable::opcode0x4XNN()
 {
-    if (v[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF)) {
-        programCounter += 2;
+    unsigned short opcode = memory.getCurrentOpcode();
+    unsigned char x = (opcode & 0x0F00) >> 8;
+    unsigned char nn = opcode & 0x00FF;
+
+    if (!memory.registerEquals(x, nn)) {
+        memory.advanceToNextInstruction();
     }
 
-    programCounter += 2;
+    memory.advanceToNextInstruction();
 }
 
 //skip next instruction if Vx == Vy
 void OpcodeTable::opcode0x5XY0()
 {
-    if (v[(opcode & 0x0F00) >> 8] == v[(opcode & 0x00F0) >> 4]) {
-        programCounter += 2;
+    unsigned short opcode = memory.getCurrentOpcode();
+    unsigned char x = (opcode & 0x0F00) >> 8;
+    unsigned char y = (opcode & 0x00F0) >> 4;
+
+    if (memory.registersEqual(x, y)) {
+        memory.advanceToNextInstruction();
     }
 
-    programCounter += 2;
+    memory.advanceToNextInstruction();
 }
 
 //load NN into Vx
 void OpcodeTable::opcode0x6XNN()
 {
-    v[(opcode & 0x0F00) >> 8] = opcode & 0x00FF;
+    unsigned short opcode = memory.getCurrentOpcode();
+    unsigned char x = (opcode & 0x0F00) >> 8;
+    unsigned char nn = opcode & 0x00FF;
 
-    programCounter += 2;
+    memory.setRegister(x, nn);
+
+    memory.advanceToNextInstruction();
 }
 
 //add NN to Vx, store result in Vx (doesn't set carry flag)
 void OpcodeTable::opcode0x7XNN()
 {
-    v[(opcode & 0x0F00) >> 8] += (opcode & 0x00FF);
+    unsigned short opcode = memory.getCurrentOpcode();
+    unsigned char x = (opcode & 0x0F00) >> 8;
+    unsigned char nn = opcode & 0x00FF;
 
-    programCounter += 2;
+    memory.setRegister(x, memory.getRegister(x) + nn);
+
+    memory.advanceToNextInstruction();
 }
 
 //store Vy into Vx
 void OpcodeTable::opcode0x8XY0()
 {
-    v[(opcode & 0x0F00) >> 8] = v[(opcode & 0x00F0) >> 4];
+    unsigned short opcode = memory.getCurrentOpcode();
+    unsigned char x = (opcode & 0x0F00) >> 8;
+    unsigned char y = (opcode & 0x00F0) >> 4;
 
-    programCounter += 2;
+    memory.setRegister(x, memory.getRegister(y));
+
+    memory.advanceToNextInstruction();
 }
 
 //OR Vx w/ Vy, store result in Vx
 void OpcodeTable::opcode0x8XY1()
 {
-    v[(opcode & 0x0F00) >> 8] |= v[(opcode & 0x00F0) >> 4];
+    unsigned short opcode = memory.getCurrentOpcode();
+    unsigned char x = (opcode & 0x0F00) >> 8;
+    unsigned char y = (opcode & 0x00F0) >> 4;
 
-    programCounter += 2;
+    memory.setRegister(x, memory.getRegister(x) | memory.getRegister(y));
+
+    memory.advanceToNextInstruction();
 }
 
 //AND Vx w/ Vy, store result in Vx
 void OpcodeTable::opcode0x8XY2()
 {
-    v[(opcode & 0x0F00) >> 8] &= v[(opcode & 0x00F0) >> 4];
+    unsigned short opcode = memory.getCurrentOpcode();
+    unsigned char x = (opcode & 0x0F00) >> 8;
+    unsigned char y = (opcode & 0x00F0) >> 4;
 
-    programCounter += 2;
+    memory.setRegister(x, memory.getRegister(x) & memory.getRegister(y));
+
+    memory.advanceToNextInstruction();
 }
 
 //XOR Vx w/ Vy, store result in Vx
 void OpcodeTable::opcode0x8XY3()
 {
-    v[(opcode & 0x0F00) >> 8] ^= v[(opcode & 0x00F0) >> 4];
+    unsigned short opcode = memory.getCurrentOpcode();
+    unsigned char x = (opcode & 0x0F00) >> 8;
+    unsigned char y = (opcode & 0x00F0) >> 4;
 
-    programCounter += 2;
+    memory.setRegister(x, memory.getRegister(x) ^ memory.getRegister(y));
+
+    memory.advanceToNextInstruction();
 }
 
 //add Vy to Vx, store result in Vx. If result > 255, set v[0xF] to 1, else set v[0xF] to 0 (carry flag)
 void OpcodeTable::opcode0x8XY4()
 {
-    //if Vy > (255 - Vx), we will overflow 1 byte, so set the carry flag to 1
-    if (v[(opcode & 0x00F0) >> 4] > (0xFF - v[(opcode & 0x0F00) >> 8])) {
-        v[0xF] = 1;
+    unsigned short opcode = memory.getCurrentOpcode();
+    unsigned char x = (opcode & 0x0F00) >> 8;
+    unsigned char y = (opcode & 0x00F0) >> 4;
+
+    // if Vy > (255 - Vx), we will overflow 1 byte, so set the carry flag to 1
+    if (memory.getRegister(y) > (0xFF - memory.getRegister(x))) {
+        memory.setRegister(0xF, 1);
     } else {
-        v[0xF] = 0;
+        memory.setRegister(0xF, 0);
     }
 
-    v[(opcode & 0x0F00) >> 8] += v[(opcode & 0x00F0) >> 4];
+    memory.setRegister(x, memory.getRegister(x) + memory.getRegister(y));
 
-    programCounter += 2;
+    memory.advanceToNextInstruction();
 }
 
 //if Vx > Vy, set v[0xF] to 1, else set v[0xF] to 0. then, Vx = Vx - Vy
