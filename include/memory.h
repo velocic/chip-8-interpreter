@@ -22,14 +22,20 @@ class Memory
         void fetchOpcode();
         void flushGraphics();
         unsigned short getCurrentOpcode();
+        unsigned char getDelayTimer();
         bool getDrawFlag();
+        unsigned short getIndex();
         unsigned short getProgramCounter();
         unsigned char getRegister(unsigned char registerX);
+        unsigned char getSoundTimer();
         bool registerEquals(unsigned char registerX, unsigned char constant);
         bool registersEqual(unsigned char registerX, unsigned char registerY);
+        void setDelayTimer(unsigned char time);
         void setDrawFlag(bool drawFlag);
+        void setIndex(unsigned short value);
         void setProgramCounter(unsigned short newCounter);
         void setRegister(unsigned char registerX, unsigned char value);
+        void setSoundTimer(unsigned char time);
         unsigned short stackPop();
         void stackPush(unsigned short value);
 }

@@ -366,90 +366,112 @@ void OpcodeTable::opcode0x8XY4()
 //if Vx > Vy, set v[0xF] to 1, else set v[0xF] to 0. then, Vx = Vx - Vy
 void OpcodeTable::opcode0x8XY5()
 {
-    if (v[(opcode & 0x0F00) >> 8] > v[(opcode & 0x00F0) >> 4]) {
-        v[0xF] = 1;
+    unsigned short opcode = memory.getCurrentOpcode();
+    unsigned char x = (opcode & 0x0F00) >> 8;
+    unsigned char y = (opcode & 0x00F0) >> 4;
+
+    if (memory.getRegister(x) > memory.getRegister(y)) {
+        memory.setRegister(0xF, 1);
     } else {
-        v[0xF] = 0;
+        memory.setRegister(0xF, 0);
     }
 
-    v[(opcode & 0x0F00) >> 8] -= v[(opcode & 0x00F0) >> 4];
+    memory.setRegister(x, memory.getRegister(x) - memory.getRegister(y));
 
-    programCounter += 2;
+    memory.advanceToNextInstruction();
 }
 
 // if least-significant bit of Vx is 1, set v[0xF] to 1, else set it to 0.
 // then, divide by 2
 void OpcodeTable::opcode0x8XY6()
 {
-    if ((v[(opcode & 0x0F00) >> 8] & 0x01) == 0x01) {
-        v[0xF] = 1;
+    unsigned short opcode = memory.getCurrentOpcode();
+    unsigned char x = (opcode & 0x0F00) >> 8;
+
+    if ((memory.getRegister(x) & 0x01) == 0x01) {
+        memory.setRegister(0xF, 1);
     } else {
-        v[0xF] = 0;
+        memory.setRegister(0xF, 0);
     }
 
-    v[(opcode & 0x0F00) >> 8] >>= 1;
+    memory.setRegister(x, memory.getRegister(x) >> 1);
 
-    programCounter += 2;
+    memory.advanceToNextInstruction();
 }
 
 //if Vy > Vx, set v[0xF] to 1, else set to 0. Then Vx = Vy - Vx
 void OpcodeTable::opcode0x8XY7()
 {
-    if (v[(opcode & 0x00F0) >> 4] > v[(opcode & 0x0F00) >> 8]) {
-        v[0xF] = 1;
+    unsigned short opcode = memory.getCurrentOpcode();
+    unsigned char x = (opcode & 0x0F00) >> 8;
+    unsigned char y = (opcode & 0x00F0) >> 4;
+
+    if (memory.getRegister(y) > memory.getRegister(x)) {
+        memory.setRegister(0xF, 1);
     } else {
-        v[0xF] = 0;
+        memory.setRegister(0xF, 0);
     }
 
-    v[(opcode & 0x0F00) >> 8] = (v[(opcode & 0x00F0) >> 4] - v[(opcode & 0x0F00) >> 8]);
+    memory.setRegister(x, memory.getRegister(y) - memory.getRegister(x));
 
-    programCounter += 2;
+    memory.advanceToNextInstruction();
 }
 
 //if most-significant bit of Vx is 1, set v[0xF] to 1. else, set it to 0. Then, multiply Vx by 2
 void OpcodeTable::opcode0x8XYE()
 {
-    if ((v[(opcode & 0x0F00) >> 8] >> 7) == 0x01) {
-        v[0xF] = 1;
+    unsigned short opcode = memory.getCurrentOpcode();
+    unsigned char x = (opcode & 0x0F00) >> 8;
+
+    if ((memory.getRegister(x) >> 7) == 0x01) {
+        memory.setRegister(0xF, 1);
     } else {
-        v[0xF] = 0;
+        memory.setRegister(0xF, 0);
     }
 
-    v[(opcode & 0x0F00) >> 8] = (v[opcode & 0x0F00] << 1);
+    memory.setRegister(x, memory.getRegister(x) << 1);
 
-    programCounter += 2;
+    memory.advanceToNextInstruction();
 }
 
 //skip next instruction if Vx != Vy
 void OpcodeTable::opcode0x9XY0()
 {
-    if (v[(opcode & 0x0F00) >> 8] != v[(opcode & 0x00F0) >> 4]) {
-        programCounter += 2;
+    unsigned short opcode = memory.getCurrentOpcode();
+    unsigned char x = (opcode & 0x0F00) >> 8;
+    unsigned char y = (opcode & 0x00F0) >> 4;
+
+    if (!memory.registersEqual(x, y)) {
+        memory.advanceToNextInstruction();
     }
 
-    programCounter += 2;
+    memory.advanceToNextInstruction();
 }
 
 //set index register to NNN
 void OpcodeTable::opcode0xANNN()
 {
-    index = (opcode & 0x0FFF);
+    memory.setIndex(memory.getCurrentOpcode() & 0x0FFF);
 
-    programCounter += 2;
+    memory.advanceToNextInstruction();
 }
 
 //set pc to NNN + v[0x0]
 void OpcodeTable::opcode0xBNNN()
 {
-    programCounter = (opcode & 0x0FFF) + v[0x0];
+    memory.setProgramCounter((memory.getCurrentOpcode() & 0x0FFF) + memory.getRegister(0x0));
 }
 
 //generate random number between 0 and 255, AND it with NN, then save the result in Vx
 void OpcodeTable::opcode0xCXNN()
 {
-    v[(opcode & 0x0F00) >> 8] = (opcode & 0x00FF) & uniformDist(rng);
+    unsigned short opcode = memory.getCurrentOpcode();
+    unsigned char x = (opcode & 0x0F00) >> 8;
+    unsigned char nn = opcode & 0x00FF;
 
-    programCounter += 2;
+    memory.setRegister(x, nn & uniformDist(rng));
+
+    memory.advanceToNextInstruction();
 }
 
 /* Note: This explanation comes from Cowgod's Chip-8 Technical Reference v1.0 verbatim.
@@ -484,9 +506,12 @@ void OpcodeTable::opcode0xEXA1()
 //set Vx to the value of the delay timer
 void OpcodeTable::opcode0xFX07()
 {
-    v[(opcode & 0x0F00) >> 8] = delayTimer;
+    unsigned short opcode = memory.getCurrentOpcode();
+    unsigned char x = (opcode & 0x0F00) >> 8;
 
-    programCounter += 2;
+    memory.setRegister(x, memory.getDelayTimer);
+
+    memory.advanceToNextInstruction();
 }
 
 //wait for a key press, then store the key's value in Vx
@@ -500,9 +525,12 @@ void OpcodeTable::opcode0xFX0A()
 void OpcodeTable::opcode0xFX15()
 {
     //TODO: need to count the timer down somehow
-    delayTimer = v[(opcode & 0x0F00) >> 8];
+    unsigned short opcode = memory.getCurrentOpcode();
+    unsigned char x = (opcode & 0x0F00) >> 8;
 
-    programCounter += 2;
+    memory.setDelayTimer(memory.getRegister(x));
+
+    memory.advanceToNextInstruction();
 }
 
 //set the sound timer to Vx

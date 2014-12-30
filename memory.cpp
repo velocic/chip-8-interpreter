@@ -25,9 +25,19 @@ unsigned short getCurrentOpcode()
     return opcode;
 }
 
+unsigned char Memory::getDelayTimer()
+{
+    return delayTimer;
+}
+
 bool Memory::getDrawFlag()
 {
     return drawFlag;
+}
+
+unsigned short Memory::getIndex()
+{
+    return index;
 }
 
 unsigned short Memory::getProgramCounter()
@@ -39,6 +49,11 @@ unsigned char Memory::getRegister(unsigned char registerX)
 {
     //TODO: handle case of invalid register specified
     return v[registerX];
+}
+
+unsigned char Memory::getSoundTimer()
+{
+    return soundTimer;
 }
 
 bool Memory::registerEquals(unsigned char registerX, unsigned char constant)
@@ -61,9 +76,20 @@ bool Memory::registersEqual(unsigned char registerX, unsigned char registerY)
     return false;
 }
 
+void Memory::setDelayTimer(unsigned char time)
+{
+    delayTimer = time;
+}
+
 void Memory::setDrawFlag(bool flag)
 {
     drawFlag = flag;
+}
+
+void Memory::setIndex(unsigned short value)
+{
+    //TODO: handle case of value > 0x0FFF
+    index = value;
 }
 
 void Memory::setProgramCounter(unsigned short address)
@@ -75,6 +101,11 @@ void Memory::setRegister(unsigned char registerX, unsigned char value)
 {
     //TODO: handle case of invalid register specified
     v[registerX] = value;
+}
+
+void Memory::setSoundTimer(unsigned char time)
+{
+    soundTimer = time;
 }
 
 unsigned short Memory::stackPop()
