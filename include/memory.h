@@ -25,6 +25,7 @@ class Memory
         unsigned char getDelayTimer();
         bool getDrawFlag();
         unsigned short getIndex();
+        unsigned char getMemoryAtAddress(unsigned short address);
         unsigned short getProgramCounter();
         unsigned char getRegister(unsigned char registerX);
         unsigned char getSoundTimer();
@@ -33,6 +34,7 @@ class Memory
         void setDelayTimer(unsigned char time);
         void setDrawFlag(bool drawFlag);
         void setIndex(unsigned short value);
+        void setMemoryAtAddress(unsigned short address, unsigned char value);
         void setProgramCounter(unsigned short newCounter);
         void setRegister(unsigned char registerX, unsigned char value);
         void setSoundTimer(unsigned char time);

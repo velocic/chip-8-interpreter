@@ -16,7 +16,7 @@ void Memory::fetchOpcode()
 void Memory::flushGraphics()
 {
     for (int i = 0; i < 2048; ++i) {
-        graphics[i] &= 0x00;
+        graphics[i] = 0x00;
     }
 }
 
@@ -38,6 +38,12 @@ bool Memory::getDrawFlag()
 unsigned short Memory::getIndex()
 {
     return index;
+}
+
+unsigned char Memory::getMemoryAtAddress(unsigned short address)
+{
+    //TODO: handle case of address > 0x0FFF
+    return memory[address];
 }
 
 unsigned short Memory::getProgramCounter()
@@ -90,6 +96,12 @@ void Memory::setIndex(unsigned short value)
 {
     //TODO: handle case of value > 0x0FFF
     index = value;
+}
+
+void Memory::setMemoryAtAddress(unsigned short address, unsigned char value)
+{
+    //TODO: handle case of address > 0x0FFF (max addressable memory space)
+    memory[address] = value;
 }
 
 void Memory::setProgramCounter(unsigned short address)

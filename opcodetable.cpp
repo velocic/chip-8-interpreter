@@ -536,18 +536,24 @@ void OpcodeTable::opcode0xFX15()
 //set the sound timer to Vx
 void OpcodeTable::opcode0xFX18()
 {
-    //TODO: need to count the timer down somehow
-    soundTimer = v[(opcode & 0x0F00) >> 8];
+    unsigned short opcode = memory.getCurrentOpcode();
+    unsigned char x = (opcode & 0x0F00) >> 8;
 
-    programCounter += 2;
+    //TODO: need to count the timer down somehow
+    memory.setSoundTimer(memory.getRegister(x));
+
+    memory.advanceToNextInstruction();
 }
 
 //add index and Vx, store result in index
 void OpcodeTable::opcode0xFX1E()
 {
-    index += v[(opcode & 0x0F00) >> 8];
+    unsigned short opcode = memory.getCurrentOpcode();
+    unsigned char x = (opcode & 0x0F00) >> 8;
 
-    programCounter += 2;
+    memory.setIndex(memory.getIndex() + memory.getRegister(x));
+
+    memory.advanceToNextInstruction();
 }
 
 //set i to the location of the sprite for digit Vx
@@ -560,36 +566,43 @@ void OpcodeTable::opcode0xFX29()
 //store binary-coded decimal representation of Vx in memory locations i, i+1. and i+2
 void OpcodeTable::opcode0xFX33()
 {
-    int registerValue = v[(opcode & 0x0F00) >> 8];
-    int leastSignificantDigit = 0;
+    unsigned short opcode = memory.getCurrentOpcode();
+    unsigned char registerValue = memory.getRegister((opcode & 0x0F00) >> 8);
+    unsigned char leastSignificantDigit = 0;
 
     for (int i = 2; i >= 0; --i) {
         leastSignificantDigit = registerValue % 10;
         registerValue -= leastSignificantDigit;
         registerValue /= 10;
 
-        memory[index + i] = leastSignificantDigit;
+        memory.setMemoryAtAddress(memory.getIndex() + i, leastSignificantDigit);
     }
 
-    programCounter += 2;
+    memory.advanceToNextInstruction();
 }
 
 //store registers V0 - Vx in memory starting at index
 void OpcodeTable::opcode0xFX55()
 {
-    for (int i = 0; i <= ((opcode & 0x0F00) >> 8); ++i) {
-        memory[index + i] = v[i];
+    unsigned short opcode = memory.getCurrentOpcode();
+    unsigned char x = (opcode & 0x0F00) >> 8;
+
+    for (int i = 0; i <= x; ++i) {
+        memory.setMemoryAtAddress(memory.getIndex() + i, memory.getRegister(i));
     }
 
-    programCounter += 2;
+    memory.advanceToNextInstruction();
 }
 
 //read memory starting at index into registers V0 - Vx
 void OpcodeTable::opcode0xFX65()
 {
-    for (int i = 0; i <= ((opcode & 0x0F00) >> 8); ++i) {
-        v[i] = memory[index + i];
+    unsigned short opcode = memory.getCurrentOpcode();
+    unsigned char x = (opcode & 0x0F00) >> 8;
+
+    for (int i = 0; i <= x; ++i) {
+        memory.setRegister(i, memory.getMemoryAtAddress(index + i));
     }
 
-    programCounter += 2;
+    memory.advanceToNextInstruction();
 }
