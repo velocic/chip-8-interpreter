@@ -1,3 +1,5 @@
+#include <memory.h>
+
 Memory::Memory()
 {
     //TODO: initialize all class members

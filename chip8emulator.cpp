@@ -1,9 +1,12 @@
-#include <iostream>
 #include <cpu.h>
+#include <memory.h>
+#include <opcodetable.h>
 
 int main()
 {
-    Cpu chip8;
+    Memory memory;
+    OpcodeTable opcodeTable;
+    Cpu chip8(opcodeTable, memory);
     chip8.initializeEnvironment();
     
     //debug, run the emulateCycle funciton once

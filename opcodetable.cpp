@@ -1,3 +1,5 @@
+#include <opcodetable.h>
+
 OpcodeTable::OpcodeTable()
 {
     initializeOpcodeJumpTable();

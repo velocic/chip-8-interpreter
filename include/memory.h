@@ -40,6 +40,6 @@ class Memory
         void setSoundTimer(unsigned char time);
         unsigned short stackPop();
         void stackPush(unsigned short value);
-}
+};
 
 #endif

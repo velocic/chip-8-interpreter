@@ -2,9 +2,9 @@
 #define CPU_H
 
 #include <iostream>
-#include <map>
-#include <random>
 #include <chrono>
+#include <memory.h>
+#include <opcodetable.h>
 
 class Cpu
 {
@@ -12,7 +12,8 @@ class Cpu
         OpcodeTable opcodeTable;
         Memory memory;
     public:
-        Cpu(OpcodeTable opcodeTable, Memory memory) : opcodeTable(opcodeTable), memory(memory) {};
+        // Cpu(OpcodeTable opcodeTable, Memory memory) : opcodeTable(opcodeTable), memory(memory) {};
+        Cpu() {};
         void initializeEnvironment();
         void emulateCycle();
 };

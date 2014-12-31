@@ -1,9 +1,12 @@
 #include <cpu.h>
+Cpu::Cpu()
+{
+    memory = Memory();
+    opcodeTable = OpcodeTable(memory);
+}
 
 void Cpu::initializeEnvironment()
 {
-    initializeOpcodeJumpTable();
-    initializeRandomNumberGenerator();
 }
 
 void Cpu::emulateCycle()
