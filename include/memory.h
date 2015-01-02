@@ -24,7 +24,9 @@ class Memory
         unsigned short getCurrentOpcode();
         unsigned char getDelayTimer();
         bool getDrawFlag();
+        unsigned char (&getGraphics())[2048];
         unsigned short getIndex();
+        unsigned char (&getKeypadState())[16];
         unsigned char getMemoryAtAddress(unsigned short address);
         unsigned short getProgramCounter();
         unsigned char getRegister(unsigned char registerX);
