@@ -1,10 +1,34 @@
-#define CATCH_CONFIG_MAIN
+#define CATCH_CONFIG_RUNNER
 #include <catch.hpp>
 #include <memory.h>
 
+class MemoryTest : public Memory
+{
+    public:
+        unsigned short opcode; //unsigned short = 2-bytes
+        unsigned char memory[4096];
+        unsigned char graphics[2048]; //64 pixels * 32 pixels
+        unsigned short stack[16];
+        unsigned short stackPointer;
+        unsigned char keypad[16]; //supports 16 keys (0x0 - 0xF)
+        unsigned char v[16]; //1-byte registers
+        unsigned short index; //2-byte address index register
+        unsigned short programCounter; //2-byte program counter
+        unsigned char delayTimer; //1-byte delay timer
+        unsigned char soundTimer; //1-byte sound timer
+        bool drawFlag = false;
+};
+
+int main(int argc, char* const argv[])
+{
+    int result = Catch::Session().run(argc, argv);
+
+    return result;
+}
+
 TEST_CASE("Memory", "Test memory is properly initialized when constructed")
 {
-    Memory m;
+    MemoryTest m;
 
     CHECK(m.getCurrentOpcode() == 0);
 
@@ -29,6 +53,7 @@ TEST_CASE("Memory", "Test memory is properly initialized when constructed")
 
     //TODO: test stack is zeroed out
     //TODO: test stack pointer is zero
+    CHECK(m.stackPointer == 0);
 
     bool foundNonZeroDataInKeypad = false;
     unsigned char *keypad = m.getKeypadState();
