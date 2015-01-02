@@ -4,9 +4,11 @@
 
 int main()
 {
+    // Memory memory;
+    // OpcodeTable opcodeTable;
     Memory memory;
-    OpcodeTable opcodeTable;
-    Cpu chip8(opcodeTable, memory);
+    OpcodeTable opcodeTable(memory);
+    Cpu chip8(memory, opcodeTable);
     chip8.initializeEnvironment();
     
     //debug, run the emulateCycle funciton once

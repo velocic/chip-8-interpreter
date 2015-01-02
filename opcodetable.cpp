@@ -1,9 +1,9 @@
 #include <opcodetable.h>
 
-OpcodeTable::OpcodeTable()
-{
-    initializeOpcodeJumpTable();
-}
+// OpcodeTable::OpcodeTable()
+// {
+//     initializeOpcodeJumpTable();
+// }
 
 void OpcodeTable::initializeOpcodeJumpTable()
 {
@@ -172,22 +172,22 @@ std::map<std::pair<int, int>, OpcodeTable::opcodeFunction> OpcodeTable::get0xFJu
 
 void OpcodeTable::navigateOpcode0x0JumpTable()
 {
-    (this->*opcode0x0JumpTable[opcode & 0x00FF])();
+    (this->*opcode0x0JumpTable[memory.getCurrentOpcode() & 0x00FF])();
 }
 
 void OpcodeTable::navigateOpcode0x8JumpTable()
 {
-    (this->*opcode0x8JumpTable[opcode & 0x00FF])();
+    (this->*opcode0x8JumpTable[memory.getCurrentOpcode() & 0x00FF])();
 }
 
 void OpcodeTable::navigateOpcode0xEJumpTable()
 {
-    (this->*opcode0xEJumpTable[opcode & 0x00FF])();
+    (this->*opcode0xEJumpTable[memory.getCurrentOpcode() & 0x00FF])();
 }
 
 void OpcodeTable::navigateOpcode0xFJumpTable()
 {
-    (this->*opcode0xFJumpTable[opcode & 0x00FF])();
+    (this->*opcode0xFJumpTable[memory.getCurrentOpcode() & 0x00FF])();
 }
 
 void OpcodeTable::noOp()
@@ -486,23 +486,20 @@ void OpcodeTable::opcode0xCXNN()
 void OpcodeTable::opcode0xDXYN()
 {
     //TODO: place sprite into graphics buffer
-    drawFlag = true;
-    programCounter += 2;
-    std::cout << "called 0xDXYN" << std::endl;
+    memory.setDrawFlag(true);
+    memory.advanceToNextInstruction();
 }
 
 //if the key corresponding to Vx is pressed, skip next instruction
 void OpcodeTable::opcode0xEX9E()
 {
     //TODO: figure out a good way to get user input into this function
-    std::cout << "called 0xEX9E" << std::endl;
 }
 
 //if the key corresponding to Vx is NOT pressed, skip next instruction
 void OpcodeTable::opcode0xEXA1()
 {
     //TODO: figure out a good way to get user input into this function
-    std::cout << "called 0xEXA1" << std::endl;
 }
 
 //set Vx to the value of the delay timer
@@ -511,7 +508,7 @@ void OpcodeTable::opcode0xFX07()
     unsigned short opcode = memory.getCurrentOpcode();
     unsigned char x = (opcode & 0x0F00) >> 8;
 
-    memory.setRegister(x, memory.getDelayTimer);
+    memory.setRegister(x, memory.getDelayTimer());
 
     memory.advanceToNextInstruction();
 }
@@ -520,7 +517,6 @@ void OpcodeTable::opcode0xFX07()
 void OpcodeTable::opcode0xFX0A()
 {
     //TODO: figure out a good way to get user input into this function
-    std::cout << "called 0xFX0A" << std::endl;
 }
 
 //set the delay timer to Vx
@@ -562,7 +558,6 @@ void OpcodeTable::opcode0xFX1E()
 void OpcodeTable::opcode0xFX29()
 {
     //TODO: implement after setting character set into memory
-    std::cout << "called 0xFX29" << std::endl;
 }
 
 //store binary-coded decimal representation of Vx in memory locations i, i+1. and i+2
@@ -603,7 +598,7 @@ void OpcodeTable::opcode0xFX65()
     unsigned char x = (opcode & 0x0F00) >> 8;
 
     for (int i = 0; i <= x; ++i) {
-        memory.setRegister(i, memory.getMemoryAtAddress(index + i));
+        memory.setRegister(i, memory.getMemoryAtAddress(memory.getIndex() + i));
     }
 
     memory.advanceToNextInstruction();

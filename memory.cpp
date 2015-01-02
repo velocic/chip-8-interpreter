@@ -22,7 +22,7 @@ void Memory::flushGraphics()
     }
 }
 
-unsigned short getCurrentOpcode()
+unsigned short Memory::getCurrentOpcode()
 {
     return opcode;
 }

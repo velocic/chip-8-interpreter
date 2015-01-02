@@ -9,11 +9,10 @@
 class Cpu
 {
     private:
-        OpcodeTable opcodeTable;
-        Memory memory;
+        Memory &memory;
+        OpcodeTable &opcodeTable;
     public:
-        // Cpu(OpcodeTable opcodeTable, Memory memory) : opcodeTable(opcodeTable), memory(memory) {};
-        Cpu() {};
+        Cpu(Memory &memory, OpcodeTable &opcodeTable) : memory(memory), opcodeTable(opcodeTable) {};
         void initializeEnvironment();
         void emulateCycle();
 };
