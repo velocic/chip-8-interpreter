@@ -2,31 +2,7 @@
 
 Memory::Memory()
 {
-    opcode = 0;
-    flushGraphics();
-
-    //zero-out the arrays
-    for (int i = 0; i < 4096; ++i) {
-        memory[i] = 0;
-
-        if (i < 16) {
-            stack[i] = 0;
-            keypad[i] = 0;
-            v[i] = 0;
-        }
-    }
-
-    stackPointer = 0;
-    index = 0;
-    
-    //programs start at 0x200, memory below that reserved for the interpreter
-    programCounter = 0x200;
-    delayTimer = 0;
-    soundTimer = 0;
-
-    //TODO: Load the font-set into memory
-    //TODO: Load the program into memory
-
+    initialize();
 }
 
 void Memory::advanceToNextInstruction()
@@ -96,6 +72,35 @@ unsigned char Memory::getRegister(unsigned char registerX)
 unsigned char Memory::getSoundTimer()
 {
     return soundTimer;
+}
+
+void Memory::initialize()
+{
+    opcode = 0;
+    flushGraphics();
+
+    //zero-out the arrays
+    for (int i = 0; i < 4096; ++i) {
+        memory[i] = 0;
+
+        if (i < 16) {
+            stack[i] = 0;
+            keypad[i] = 0;
+            v[i] = 0;
+        }
+    }
+
+    stackPointer = 0;
+    index = 0;
+
+    //programs start at 0x200, memory below that reserved for the interpreter
+    programCounter = 0x200;
+    delayTimer = 0;
+    soundTimer = 0;
+
+    //TODO: Load the font-set into memory
+    //TODO: Load the program into memory
+
 }
 
 bool Memory::registerEquals(unsigned char registerX, unsigned char constant)

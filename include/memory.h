@@ -16,6 +16,8 @@ class Memory
         unsigned char delayTimer; //1-byte delay timer
         unsigned char soundTimer; //1-byte sound timer
         bool drawFlag = false;
+
+        void initialize();
     public:
         Memory();
         void advanceToNextInstruction();

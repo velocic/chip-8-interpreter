@@ -1,34 +1,10 @@
-#define CATCH_CONFIG_RUNNER
+#define CATCH_CONFIG_MAIN
 #include <catch.hpp>
 #include <memory.h>
 
-class MemoryTest : public Memory
+TEST_CASE("Test memory is properly initialized when constructed", "Memory")
 {
-    public:
-        unsigned short opcode; //unsigned short = 2-bytes
-        unsigned char memory[4096];
-        unsigned char graphics[2048]; //64 pixels * 32 pixels
-        unsigned short stack[16];
-        unsigned short stackPointer;
-        unsigned char keypad[16]; //supports 16 keys (0x0 - 0xF)
-        unsigned char v[16]; //1-byte registers
-        unsigned short index; //2-byte address index register
-        unsigned short programCounter; //2-byte program counter
-        unsigned char delayTimer; //1-byte delay timer
-        unsigned char soundTimer; //1-byte sound timer
-        bool drawFlag = false;
-};
-
-int main(int argc, char* const argv[])
-{
-    int result = Catch::Session().run(argc, argv);
-
-    return result;
-}
-
-TEST_CASE("Memory", "Test memory is properly initialized when constructed")
-{
-    MemoryTest m;
+    Memory m;
 
     CHECK(m.getCurrentOpcode() == 0);
 
@@ -50,10 +26,6 @@ TEST_CASE("Memory", "Test memory is properly initialized when constructed")
         }
     }
     CHECK(foundNonZeroDataInGraphicsArray == false);
-
-    //TODO: test stack is zeroed out
-    //TODO: test stack pointer is zero
-    CHECK(m.stackPointer == 0);
 
     bool foundNonZeroDataInKeypad = false;
     unsigned char *keypad = m.getKeypadState();
@@ -78,6 +50,53 @@ TEST_CASE("Memory", "Test memory is properly initialized when constructed")
     CHECK(m.getDrawFlag() == false);
 }
 
-// TEST_CASE("Memory", "Test advanceToNextInstruction() increments program counter properly") {
-//     // Memory m;
-// }
+TEST_CASE("Test advanceToNextInstruction() increments program counter properly", "Memory")
+{
+    Memory m;
+
+    CHECK(m.getProgramCounter() == 0x200);
+    m.advanceToNextInstruction();
+    CHECK(m.getProgramCounter() == 0x202);
+    m.advanceToNextInstruction();
+    CHECK(m.getProgramCounter() == 0x204);
+}
+
+TEST_CASE("Test flushGraphics() clears graphics array", "Memory")
+{
+    //TODO: fill in after implementing a way to set graphics
+}
+
+TEST_CASE("Test registerEquals() compares proper register to constant", "Memory")
+{
+    Memory m;
+
+    CHECK(m.registerEquals(3, 50) == false);
+    
+    m.setRegister(3, 50);
+
+    CHECK(m.registerEquals(3, 50) == true);
+}
+
+TEST_CASE("Test registersEqual() compares proper registers", "Memory")
+{
+    Memory m;
+
+    CHECK(m.registersEqual(0x0, 0xF) == true);
+
+    m.setRegister(0x0, 23);
+    m.setRegister(0xF, 103);
+
+    CHECK(m.registersEqual(0x0, 0xF) == false);
+}
+
+TEST_CASE("Test stack stores and retrieves 16 values", "Memory")
+{
+    Memory m;
+
+    m.stackPush(1);
+    m.stackPush(2);
+    m.stackPush(3);
+    CHECK(m.stackPop() == 3);
+    CHECK(m.stackPop() == 2);
+    CHECK(m.stackPop() == 1);
+}
