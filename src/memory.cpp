@@ -12,7 +12,8 @@ void Memory::advanceToNextInstruction()
 
 void Memory::fetchOpcode()
 {
-    opcode = memory[programCounter];
+    opcode = memory[programCounter] << 8;
+    opcode |= memory[programCounter+1];
 }
 
 void Memory::flushGraphics()
@@ -90,7 +91,7 @@ void Memory::initialize()
         }
     }
 
-    stackPointer = 0;
+    stackPointer = -1;
     index = 0;
 
     //programs start at 0x200, memory below that reserved for the interpreter
@@ -170,5 +171,6 @@ unsigned short Memory::stackPop()
 void Memory::stackPush(unsigned short value)
 {
     //TODO: handle case of full stack
-    stack[stackPointer++] = value;
+    ++stackPointer;
+    stack[stackPointer] = value;
 }

@@ -50,6 +50,17 @@ TEST_CASE("Test memory is properly initialized when constructed", "Memory")
     CHECK(m.getDrawFlag() == false);
 }
 
+TEST_CASE("Test fetchOpcode() grabs current opcode correctly", "Memory")
+{
+    Memory m;
+
+    m.setMemoryAtAddress(0x200, 0x00);
+    m.setMemoryAtAddress(0x201, 0xE0);
+
+    m.fetchOpcode();
+    CHECK(m.getCurrentOpcode() == 0x00E0);
+}
+
 TEST_CASE("Test advanceToNextInstruction() increments program counter properly", "Memory")
 {
     Memory m;
@@ -59,6 +70,11 @@ TEST_CASE("Test advanceToNextInstruction() increments program counter properly",
     CHECK(m.getProgramCounter() == 0x202);
     m.advanceToNextInstruction();
     CHECK(m.getProgramCounter() == 0x204);
+}
+
+TEST_CASE("Test fetchOpcode() grabs correct instruction", "Memory")
+{
+    //TODO: fill in after loading program to memory
 }
 
 TEST_CASE("Test flushGraphics() clears graphics array", "Memory")
@@ -96,6 +112,33 @@ TEST_CASE("Test stack stores and retrieves 16 values", "Memory")
     m.stackPush(1);
     m.stackPush(2);
     m.stackPush(3);
+    m.stackPush(4);
+    m.stackPush(5);
+    m.stackPush(6);
+    m.stackPush(7);
+    m.stackPush(8);
+    m.stackPush(9);
+    m.stackPush(10);
+    m.stackPush(11);
+    m.stackPush(12);
+    m.stackPush(13);
+    m.stackPush(14);
+    m.stackPush(15);
+    m.stackPush(16);
+
+    CHECK(m.stackPop() == 16);
+    CHECK(m.stackPop() == 15);
+    CHECK(m.stackPop() == 14);
+    CHECK(m.stackPop() == 13);
+    CHECK(m.stackPop() == 12);
+    CHECK(m.stackPop() == 11);
+    CHECK(m.stackPop() == 10);
+    CHECK(m.stackPop() == 9);
+    CHECK(m.stackPop() == 8);
+    CHECK(m.stackPop() == 7);
+    CHECK(m.stackPop() == 6);
+    CHECK(m.stackPop() == 5);
+    CHECK(m.stackPop() == 4);
     CHECK(m.stackPop() == 3);
     CHECK(m.stackPop() == 2);
     CHECK(m.stackPop() == 1);

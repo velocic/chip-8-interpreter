@@ -8,7 +8,7 @@ class Memory
         unsigned char memory[4096];
         unsigned char graphics[2048]; //64 pixels * 32 pixels
         unsigned short stack[16];
-        unsigned short stackPointer;
+        short stackPointer;
         unsigned char keypad[16]; //supports 16 keys (0x0 - 0xF)
         unsigned char v[16]; //1-byte registers
         unsigned short index; //2-byte address index register
