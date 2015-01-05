@@ -1,9 +1,9 @@
 #include <opcodetable.h>
 
-// OpcodeTable::OpcodeTable()
-// {
-//     initializeOpcodeJumpTable();
-// }
+void OpcodeTable::decodeAndExecuteOpcode(unsigned short opcode)
+{
+    (this->*opcodeJumpTable[opcode >> 8])();
+}
 
 void OpcodeTable::initializeOpcodeJumpTable()
 {

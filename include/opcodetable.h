@@ -69,8 +69,8 @@ class OpcodeTable
         void opcode0xFX55();
         void opcode0xFX65();
     public:
-        OpcodeTable(Memory &memory) : memory(memory) {};
-        void decodeAndExecuteOpcode(const unsigned short &opcode);
+        OpcodeTable(Memory &memory) : memory(memory) {initializeOpcodeJumpTable();};
+        void decodeAndExecuteOpcode(unsigned short opcode);
 };
 
 #endif
