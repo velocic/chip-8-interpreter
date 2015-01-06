@@ -285,3 +285,97 @@ TEST_CASE("test 0x8XY2 handler", "OpcodeTable")
     CHECK(m.getRegister(0x6) == 0x31); 
     CHECK(m.getProgramCounter() == 0x202);
 }
+
+/*
+ * Bitwise XOR register X with register Y, register
+ * X should contain the result. Then, advance PC by 2
+ */
+TEST_CASE("test 0x8XY3 handler", "OpcodeTable")
+{
+    Memory m;
+    OpcodeTable opcodeTable(m);
+
+    m.setRegister(0x8, 0xD4);
+    m.setRegister(0x9, 0x37);
+    m.setMemoryAtAddress(0x200, 0x88);
+    m.setMemoryAtAddress(0x201, 0x93);
+    m.fetchOpcode();
+    opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+
+    CHECK(m.getRegister(0x8) == 0xE3);
+    CHECK(m.getProgramCounter() == 0x202);
+}
+
+/*
+ * If register X + register Y > 255, set register 0xF to 1,
+ * else register 0xF should be set to 0. Then, register X
+ * should be set to the sum of register X and register Y
+ */
+TEST_CASE("test 0x8XY4 handler", "OpcodeTable")
+{
+    Memory m;
+    OpcodeTable opcodeTable(m);
+
+    //sum > 255
+    m.setRegister(0xA, 0xFD);
+    m.setRegister(0xB, 0x04);
+    m.setMemoryAtAddress(0x200, 0x8A);
+    m.setMemoryAtAddress(0x201, 0xB4);
+    m.fetchOpcode();
+    opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+
+    CHECK(m.getRegister(0xA) == 0x01);
+    CHECK(m.getRegister(0xF) == 0x01);
+
+    //sum < 255
+    m.setRegister(0xC, 0x20);
+    m.setRegister(0xD, 0x30);
+    m.setRegister(0xF, 0xFF); //set 0xF to some junk value
+    m.setMemoryAtAddress(0x202, 0x8C);
+    m.setMemoryAtAddress(0x203, 0xD4);
+    m.fetchOpcode();
+    opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+
+    CHECK(m.getRegister(0xC) == 0x50);
+    CHECK(m.getRegister(0xF) == 0x00);
+
+    //check PC has advanced properly
+    CHECK(m.getProgramCounter() == 0x204);
+}
+
+/*
+ * Set register 0xF to 1 if register X > register Y,
+ * else set register 0xF to 0. Then, set register X
+ * to Register X - Register Y. Then, advance PC by 2
+ */
+TEST_CASE("test 0x8XY5 handler", "OpcodeTable")
+{
+    Memory m;
+    OpcodeTable opcodeTable(m);
+
+    //X > Y
+    m.setRegister(0xD, 0x25);
+    m.setRegister(0x0, 0x10);
+    m.setMemoryAtAddress(0x200, 0x8D);
+    m.setMemoryAtAddress(0x201, 0x05);
+    m.fetchOpcode();
+    opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+
+    CHECK(m.getRegister(0xD) == 0x15);
+    CHECK(m.getRegister(0xF) == 1);
+
+    //X < Y
+    m.setRegister(0x3, 0x25);
+    m.setRegister(0x4, 0x50);
+    m.setRegister(0xF, 0xFF);
+    m.setMemoryAtAddress(0x202, 0x83);
+    m.setMemoryAtAddress(0x203, 0x45);
+    m.fetchOpcode();
+    opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+
+    CHECK(m.getRegister(0x3) == 0xD5);
+    CHECK(m.getRegister(0xF) == 0x00);
+    
+    //check PC has advanced properly
+    CHECK(m.getProgramCounter() == 0x204);
+}
