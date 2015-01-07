@@ -379,3 +379,149 @@ TEST_CASE("test 0x8XY5 handler", "OpcodeTable")
     //check PC has advanced properly
     CHECK(m.getProgramCounter() == 0x204);
 }
+
+/*
+ * If the least-significant bit of register X is 1,
+ * then set register 0xF to 1. Otherwise, set register
+ * 0xF to 0. Then register X should be set to the value
+ * of register x divided by 2
+ */
+TEST_CASE("test 0x8XY6 handler", "OpcodeTable")
+{
+    Memory m;
+    OpcodeTable opcodeTable(m);
+
+    //test least-significant bit is 1
+    m.setRegister(0x8, 0x51);
+    m.setMemoryAtAddress(0x200, 0x88);
+    m.setMemoryAtAddress(0x201, 0x66);
+    m.fetchOpcode();
+    opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+
+    CHECK(m.getRegister(0xF) == 0x01);
+    CHECK(m.getRegister(0x8) == (0x51 >> 1));
+
+    //test least-significant bit is 0
+    m.setRegister(0x9, 0x50);
+    m.setMemoryAtAddress(0x202, 0x89);
+    m.setMemoryAtAddress(0x203, 0x06);
+    m.fetchOpcode();
+    opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+
+    CHECK(m.getRegister(0xF) == 0x00);
+    CHECK(m.getRegister(0x9) == (0x50 >> 1));
+
+    //check PC has advanced properly
+    CHECK(m.getProgramCounter() == 0x204);
+}
+
+/*
+ * If register Y > register X, set register 0xF to 1,
+ * else set it to 0. Then, register X should equal
+ * register Y minus register X
+ */
+TEST_CASE("test 0x8XY7 handler", "OpcodeTable")
+{
+    Memory m;
+    OpcodeTable opcodeTable(m);
+
+    //test y > x
+    m.setRegister(0x0, 0x05);
+    m.setRegister(0x1, 0x25);
+    m.setMemoryAtAddress(0x200, 0x80);
+    m.setMemoryAtAddress(0x201, 0x17);
+    m.fetchOpcode();
+    opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+
+    CHECK(m.getRegister(0xF) == 1);
+    CHECK(m.getRegister(0x0) == 0x20);
+
+    //test y < x
+    m.setRegister(0x2, 0x25);
+    m.setRegister(0x3, 0x05);
+    m.setMemoryAtAddress(0x202, 0x82);
+    m.setMemoryAtAddress(0x203, 0x37);
+    m.fetchOpcode();
+    opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+
+    CHECK(m.getRegister(0xF) == 0);
+    CHECK(m.getRegister(0x2) == (unsigned char)(0x05 - 0x25));
+
+    //test y == x
+    m.setRegister(0xF, 0xFF);
+    m.setRegister(0x4, 0x25);
+    m.setRegister(0x5, 0x25);
+    m.setMemoryAtAddress(0x204, 0x84);
+    m.setMemoryAtAddress(0x205, 0x57);
+    m.fetchOpcode();
+    opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+
+    CHECK(m.getRegister(0xF) == 0);
+    CHECK(m.getRegister(0x4) == 0x00);
+
+    CHECK(m.getProgramCounter() == 0x206);
+}
+
+/*
+ * If the most-significant bit of register X is 1, register
+ * 0xF should be set to 1. Otherwise, register 0xF should be
+ * set to 0. Then, register X should contain register X * 2
+ */
+TEST_CASE("test 0x8XYE handler", "OpcodeTable")
+{
+    Memory m;
+    OpcodeTable opcodeTable(m);
+
+    //test most-significant bit is 1
+    m.setRegister(0xE, 0xD2);
+    m.setMemoryAtAddress(0x200, 0x8E);
+    m.setMemoryAtAddress(0x201, 0x9E);
+    m.fetchOpcode();
+    opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+
+    CHECK(m.getRegister(0xF) == 1);
+    CHECK(m.getRegister(0xE) == (unsigned char)(0xD2 << 1));
+
+    //test most-significant bit is 0
+    m.setRegister(0xA, 0x6E);
+    m.setMemoryAtAddress(0x202, 0x8A);
+    m.setMemoryAtAddress(0x203, 0xCE);
+    m.fetchOpcode();
+    opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+
+    CHECK(m.getRegister(0xF) == 0);
+    CHECK(m.getRegister(0xA) == (unsigned char)(0x6E << 1));
+
+    CHECK(m.getProgramCounter() == 0x204);
+}
+
+/*
+ * If register X is not equal to register Y, then
+ * PC should be incremented by 4. Otherwise, it should
+ * be incremented by 2 as normal
+ */
+TEST_CASE("test 0x9XY0 handler", "OpcodeTable")
+{
+    Memory m;
+    OpcodeTable opcodeTable(m);
+
+    //test registers equal
+    m.setRegister(0x0, 0xAF);
+    m.setRegister(0x1, 0xAF);
+    m.setMemoryAtAddress(0x200, 0x90);
+    m.setMemoryAtAddress(0x201, 0x10);
+    m.fetchOpcode();
+    opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+
+    CHECK(m.getProgramCounter() == 0x202);
+
+    //test registers not equal
+    m.setRegister(0x2, 0xBC);
+    m.setRegister(0x3, 0x12);
+    m.setMemoryAtAddress(0x202, 0x92);
+    m.setMemoryAtAddress(0x203, 0x30);
+    m.fetchOpcode();
+    opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+
+    CHECK(m.getProgramCounter() == 0x206);
+}
