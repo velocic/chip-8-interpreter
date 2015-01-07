@@ -525,3 +525,60 @@ TEST_CASE("test 0x9XY0 handler", "OpcodeTable")
 
     CHECK(m.getProgramCounter() == 0x206);
 }
+
+/*
+ * Index should contain the value NNN. We should increment PC
+ * by 2 as normal
+ */
+TEST_CASE("test 0xANNN handler", "OpcodeTable")
+{
+    Memory m;
+    OpcodeTable opcodeTable(m);
+
+    m.setMemoryAtAddress(0x200, 0xA5);
+    m.setMemoryAtAddress(0x201, 0x1D);
+    m.fetchOpcode();
+    opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+
+    CHECK(m.getIndex() == 0x51D);
+
+    CHECK(m.getProgramCounter() == 0x202);
+}
+
+/*
+ * Program counter should be set to the sum of register 0x0 and NNN
+ */
+TEST_CASE("test 0xBNNN handler", "OpcodeTable")
+{
+    Memory m;
+    OpcodeTable opcodeTable(m);
+
+    m.setRegister(0x0, 0x50);
+    m.setMemoryAtAddress(0x200, 0xB3);
+    m.setMemoryAtAddress(0x201, 0xFA);
+    m.fetchOpcode();
+    opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+
+    CHECK(m.getProgramCounter() == 0x44A);
+}
+
+/*
+ * Random 8-bit value should be generated, bitwise ANDed with
+ * NN, and stored in Vx. Hard to test currently, since we have
+ * no way to predict/inject the RNG (and it doesn't really make
+ * sense to set it up that way)
+ */
+TEST_CASE("test 0xCXNN handler", "OpcodeTable")
+{
+}
+
+/*
+ * Graphics array should contain an N-byte sprite beginning at coordinates
+ * graphics[register X * register Y] and ending at graphics[(register X * register Y) + N].
+ * The sprite written to graphics should match the sprite read from the range memory[index] to
+ * memory[index + N]. If we overwrite any part of an existing sprite in graphics[], then we should
+ * set register 0xF to 1. Otherwise, we should set register 0xF to 0.
+ */
+TEST_CASE("test 0xDXYN handler", "OpcodeTable")
+{
+}

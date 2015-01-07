@@ -134,6 +134,27 @@ void Memory::setDrawFlag(bool flag)
     drawFlag = flag;
 }
 
+/*
+ * XORs each bit of value into graphics[address] to graphics[address+8].
+ * Returns true (collision detected) if this operation flips a bit in the
+ * graphics array from 1 to 0. Otherwise, this returns false (collision not
+ * detected)
+ */
+bool Memory::setGraphicsAtAddress(unsigned short address, unsigned char value)
+{
+    bool collidedWithPixel = false;
+
+    for (int i = 0; i < 8; ++i) {
+        graphics[address + i] ^= ((value >> (7 - i)) & 0x01);
+
+        if (graphics[address + i] != ((value >> (7 - i)) & 0x01)) {
+            collidedWithPixel = true;
+        }
+    }
+
+    return collidedWithPixel;
+}
+
 void Memory::setIndex(unsigned short value)
 {
     //TODO: handle case of value > 0x0FFF

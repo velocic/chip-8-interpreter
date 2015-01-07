@@ -485,7 +485,25 @@ void OpcodeTable::opcode0xCXNN()
  */
 void OpcodeTable::opcode0xDXYN()
 {
-    //TODO: place sprite into graphics buffer
+    unsigned short opcode = memory.getCurrentOpcode();
+    unsigned char x = (opcode & 0x0F00) >> 8;
+    unsigned char y = (opcode & 0x00F0) >> 4;
+    unsigned char n = opcode & 0x000F;
+    bool collisionDetected = false;
+
+    //TODO: Fix this so that if reg(x) or reg(y) is 0, we don't set (0,0) as our
+    //starting coordinate
+    unsigned short startCoordinate = memory.getRegister(x) * memory.getRegister(y);
+
+    for (int i = 0; i < n; ++i) {
+        //write byte-by-byte to graphics array 
+        if (memory.setGraphicsAtAddress(startCoordinate + (i * 8), m.getMemoryAtAddress(m.getIndex() + i)) == true) {
+            collisionDetected = true;
+        }
+    }
+
+    memory.setRegister(0xF, collisionDetected);
+
     memory.setDrawFlag(true);
     memory.advanceToNextInstruction();
 }

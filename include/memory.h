@@ -37,6 +37,7 @@ class Memory
         bool registersEqual(unsigned char registerX, unsigned char registerY);
         void setDelayTimer(unsigned char time);
         void setDrawFlag(bool drawFlag);
+        bool setGraphicsAtAddress(unsigned short address, unsigned char value);
         void setIndex(unsigned short value);
         void setMemoryAtAddress(unsigned short address, unsigned char value);
         void setProgramCounter(unsigned short newCounter);
