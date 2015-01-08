@@ -581,7 +581,81 @@ TEST_CASE("test 0xCXNN handler", "OpcodeTable")
  */
 TEST_CASE("test 0xDXYN handler", "OpcodeTable")
 {
+    Memory m;
+    OpcodeTable opcodeTable(m);
+
     SECTION("Sets sprite to proper position in graphics memory") {
+        /*
+         * Set the folliwing sprite into memory
+         *              *       00010000    0x10
+         *             ***      00111000    0x38
+         *            *****     01111100    0x76
+         *           *******    11111110    0xFE
+         */
+        m.setMemoryAtAddress(0x00, 0x10);
+        m.setMemoryAtAddress(0x01, 0x38);
+        m.setMemoryAtAddress(0x02, 0x76);
+        m.setMemoryAtAddress(0x03, 0xFE);
+
+        //set the coordinate position for the sprite
+        m.setRegister(0x1, 10);
+        m.setRegister(0x2, 20);
+
+        //set the opcode to draw this sprite into location (register1, register2)
+        m.setMemoryAtAddress(0x200, 0xD1);
+        m.setMemoryAtAddress(0x201, 0x24);
+        m.fetchOpcode();
+
+        opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+        
+        //check that this sprite was rendered properly in graphics memory
+        bool spriteFirstRow[8]  = {0,0,0,1,0,0,0,0};
+        bool spriteSecondRow[8] = {0,0,1,1,1,0,0,0};
+        bool spriteThirdRow[8]  = {0,1,1,1,1,1,0,0};
+        bool spriteFourthRow[8] = {1,1,1,1,1,1,1,0};
+        bool firstRowOfSpriteRenderedCorrectly = true;
+        bool secondRowOfSpriteRenderedCorrectly = true;
+        bool thirdRowOfSpriteRenderedCorrectly = true;
+        bool fourthRowOfSpriteRenderedCorrectly = true;
+        unsigned char *graphics = m.getGraphics();
+
+        for (int i = 0; i < 8; ++i) {
+            if (graphics[340 + i] != spriteFirstRow[i]) {
+                firstRowOfSpriteRenderedCorrectly = false;
+            }
+
+            if (graphics[372 + i] != spriteSecondRow[i]) {
+                secondRowOfSpriteRenderedCorrectly = false;
+            }
+
+            if (graphics[404 + i] != spriteThirdRow[i]) {
+                thirdRowOfSpriteRenderedCorrectly = false;
+            }
+
+            if (graphics[436 + i] != spriteFourthRow[i]) {
+                fourthRowOfSpriteRenderedCorrectly = false;
+            }
+        }
+
+        //display the graphics array in the console
+        for (int i = 0; i < 2048; ++i) {
+            std::cout << (int)graphics[i];
+            if (((i+1) % 64 == 0)) {
+                std::cout << std::endl;
+            }
+        }
+        std::cout << std::endl;
+        //end displaying array in console
+
+        CHECK(firstRowOfSpriteRenderedCorrectly == true);
+        CHECK(secondRowOfSpriteRenderedCorrectly == true);
+        CHECK(thirdRowOfSpriteRenderedCorrectly == true);
+        CHECK(fourthRowOfSpriteRenderedCorrectly == true);
+
+        //Check that program counter incremented correctly
+        CHECK(m.getProgramCounter() == 0x202);
+        //Check that draw flag was set to true
+        CHECK(m.getDrawFlag() == true);
     }
 
     SECTION("Sets collision detection flag when sprites collide") {

@@ -145,6 +145,8 @@ bool Memory::setGraphicsAtAddress(unsigned short address, unsigned char value)
     bool collidedWithPixel = false;
 
     for (int i = 0; i < 8; ++i) {
+        //TODO: Horizontal screen wrapping should work fine, but
+        //may have to handle vertical screen wrapping
         graphics[address + i] ^= ((value >> (7 - i)) & 0x01);
 
         if (graphics[address + i] != ((value >> (7 - i)) & 0x01)) {

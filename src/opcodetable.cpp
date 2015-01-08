@@ -495,7 +495,8 @@ void OpcodeTable::opcode0xDXYN()
 
     for (int i = 0; i < n; ++i) {
         //write byte-by-byte to graphics array 
-        if (memory.setGraphicsAtAddress(startCoordinate + (i * 8), m.getMemoryAtAddress(m.getIndex() + i)) == true) {
+        // if (memory.setGraphicsAtAddress(startCoordinate + (i * 8), memory.getMemoryAtAddress(memory.getIndex() + i)) == true) {
+        if (memory.setGraphicsAtAddress(startCoordinate + (i * 64), memory.getMemoryAtAddress(memory.getIndex() + i)) == true) {
             collisionDetected = true;
         }
     }
