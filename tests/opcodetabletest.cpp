@@ -581,4 +581,18 @@ TEST_CASE("test 0xCXNN handler", "OpcodeTable")
  */
 TEST_CASE("test 0xDXYN handler", "OpcodeTable")
 {
+    SECTION("Sets sprite to proper position in graphics memory") {
+    }
+
+    SECTION("Sets collision detection flag when sprites collide") {
+    }
+
+    SECTION("Sets draw flag to true when called") {
+    }
+
+    SECTION("Increments program counter as expected") {
+    }
+
+    SECTION("Sets sprite properly when sprite travels outside window bounds") {
+    }
 }

@@ -491,9 +491,7 @@ void OpcodeTable::opcode0xDXYN()
     unsigned char n = opcode & 0x000F;
     bool collisionDetected = false;
 
-    //TODO: Fix this so that if reg(x) or reg(y) is 0, we don't set (0,0) as our
-    //starting coordinate
-    unsigned short startCoordinate = memory.getRegister(x) * memory.getRegister(y);
+    unsigned short startCoordinate = (memory.getRegister(x) * 32) + memory.getRegister(y);
 
     for (int i = 0; i < n; ++i) {
         //write byte-by-byte to graphics array 
