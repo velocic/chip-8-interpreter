@@ -140,13 +140,21 @@ void Memory::setDrawFlag(bool flag)
  * graphics array from 1 to 0. Otherwise, this returns false (collision not
  * detected)
  */
-bool Memory::setGraphicsAtAddress(unsigned short address, unsigned char value)
+bool Memory::setGraphicsAtAddress(unsigned short address, unsigned char startRow, unsigned char value)
 {
     bool collidedWithPixel = false;
+    bool wrappedToLeftSide = false;
 
     for (int i = 0; i < 8; ++i) {
-        //TODO: Horizontal screen wrapping should work fine, but
-        //may have to handle vertical screen wrapping
+        //Check if the next pixel we are going to write is going to be placed
+        //on a different row than the starRow. If it is, we need to subtract
+        //one row-width (64) from address. This will cause us to "wrap" the
+        //row from the right side of the screen to the left side.
+        if (wrappedToLeftSide != true && (((address + i) / 64) != startRow)) {
+            address -= 64;
+            wrappedToLeftSide = true;
+        }
+        
         graphics[address + i] ^= ((value >> (7 - i)) & 0x01);
 
         if (graphics[address + i] != ((value >> (7 - i)) & 0x01)) {

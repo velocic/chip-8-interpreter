@@ -491,13 +491,15 @@ void OpcodeTable::opcode0xDXYN()
     unsigned char n = opcode & 0x000F;
     bool collisionDetected = false;
 
-    // unsigned short startCoordinate = (memory.getRegister(x) * 32) + memory.getRegister(y);
     unsigned short startCoordinate = (memory.getRegister(y) * 64) + memory.getRegister(x);
 
     for (int i = 0; i < n; ++i) {
+        if ((startCoordinate + (i * 64)) > 2047) {
+            startCoordinate %= 64;
+        }
         //write byte-by-byte to graphics array 
-        // if (memory.setGraphicsAtAddress(startCoordinate + (i * 8), memory.getMemoryAtAddress(memory.getIndex() + i)) == true) {
-        if (memory.setGraphicsAtAddress(startCoordinate + (i * 64), memory.getMemoryAtAddress(memory.getIndex() + i)) == true) {
+        // if (memory.setGraphicsAtAddress(startCoordinate + (i * 64), memory.getRegister(y) + i, memory.getMemoryAtAddress(memory.getIndex() + i)) == true) {
+        if (memory.setGraphicsAtAddress(startCoordinate, memory.getRegister(y) + i, memory.getMemoryAtAddress(memory.getIndex() + i)) == true) {
             collisionDetected = true;
         }
     }
