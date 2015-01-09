@@ -589,13 +589,19 @@ TEST_CASE("test 0xDXYN handler", "OpcodeTable")
          * Set the folliwing sprite into memory
          *              *       00010000    0x10
          *             ***      00111000    0x38
-         *            *****     01111100    0x76
+         *            *****     01111100    0x7C
          *           *******    11111110    0xFE
          */
         m.setMemoryAtAddress(0x00, 0x10);
         m.setMemoryAtAddress(0x01, 0x38);
-        m.setMemoryAtAddress(0x02, 0x76);
+        m.setMemoryAtAddress(0x02, 0x7C);
         m.setMemoryAtAddress(0x03, 0xFE);
+        // //DEBUG RENDER A BIG RECTANGLE
+        // m.setMemoryAtAddress(0x00, 0xFF);
+        // m.setMemoryAtAddress(0x01, 0xFF);
+        // m.setMemoryAtAddress(0x02, 0xFF);
+        // m.setMemoryAtAddress(0x03, 0xFF);
+        // // END RENDER A BIG CIRCLE
 
         //set the coordinate position for the sprite
         m.setRegister(0x1, 10);
@@ -620,19 +626,19 @@ TEST_CASE("test 0xDXYN handler", "OpcodeTable")
         unsigned char *graphics = m.getGraphics();
 
         for (int i = 0; i < 8; ++i) {
-            if (graphics[340 + i] != spriteFirstRow[i]) {
+            if (graphics[1290 + i] != spriteFirstRow[i]) {
                 firstRowOfSpriteRenderedCorrectly = false;
             }
 
-            if (graphics[372 + i] != spriteSecondRow[i]) {
+            if (graphics[1354 + i] != spriteSecondRow[i]) {
                 secondRowOfSpriteRenderedCorrectly = false;
             }
 
-            if (graphics[404 + i] != spriteThirdRow[i]) {
+            if (graphics[1418 + i] != spriteThirdRow[i]) {
                 thirdRowOfSpriteRenderedCorrectly = false;
             }
 
-            if (graphics[436 + i] != spriteFourthRow[i]) {
+            if (graphics[1482 + i] != spriteFourthRow[i]) {
                 fourthRowOfSpriteRenderedCorrectly = false;
             }
         }
