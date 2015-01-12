@@ -152,12 +152,21 @@ bool Memory::setGraphicsAtAddress(unsigned short drawAddress, unsigned short spr
     bool wrappedAroundVertically = false;
     unsigned short rowOffset = 0;
     int startRow = drawAddress / 64;
+    int rowOffsetMultiplier = 0;
 
     for (int row = 0; row < spriteHeight; row++) { //vertical loop
         currentSpriteRow = getMemoryAtAddress(getIndex() + row);
-        rowOffset = row * 64;
-        //TODO: check for vertical wrap-around
 
+        rowOffset = rowOffsetMultiplier++ * 64;
+
+        //vertical wrap-around check
+        if ((drawAddress + rowOffset) > 2047) {
+            drawAddress %= 64;
+            rowOffsetMultiplier = 1;
+            rowOffset = 0;
+        }
+
+        //reset after horizontal wrap on previous row
         if (wrappedAroundHorizontally == true) {
             wrappedAroundHorizontally = false;
             drawAddress += 64;

@@ -806,27 +806,27 @@ TEST_CASE("test 0xDXYN handler", "OpcodeTable")
     }
 
     SECTION("Sets sprite properly when sprite travels outside window bounds in x-direction") {
-        m.setRegister(0x0, 60);
-        m.setRegister(0x1, 5);
+        // m.setRegister(0x0, 60);
+        // m.setRegister(0x1, 5);
+        // m.setIndex(0x04);
+        // m.setMemoryAtAddress(0x200, 0xD0);
+        // m.setMemoryAtAddress(0x201, 0x15);
+        // m.fetchOpcode();
+        // opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+        //
+        // //TODO: the actual assertions :P
+        // prettyPrintGraphicsArrayToConsole(m.getGraphics());
+    }
+
+    SECTION("Sets sprite properly when sprite travels outside window bounds in y-direction") {
+        m.setRegister(0x0, 30);
+        m.setRegister(0x1, 30);
         m.setIndex(0x04);
         m.setMemoryAtAddress(0x200, 0xD0);
         m.setMemoryAtAddress(0x201, 0x15);
         m.fetchOpcode();
         opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
 
-        //TODO: the actual assertions :P
         prettyPrintGraphicsArrayToConsole(m.getGraphics());
-    }
-
-    SECTION("Sets sprite properly when sprite travels outside window bounds in y-direction") {
-        // m.setRegister(0x0, 30);
-        // m.setRegister(0x1, 30);
-        // m.setIndex(0x04);
-        // m.setMemoryAtAddress(0x200, 0xD0);
-        // m.setMemoryAtAddress(0x201, 0x15);
-        // m.fetchOpcode();
-        // opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
-
-        // prettyPrintGraphicsArrayToConsole(m.getGraphics());
     }
 }
