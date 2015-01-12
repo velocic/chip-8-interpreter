@@ -672,142 +672,142 @@ TEST_CASE("test 0xDXYN handler", "OpcodeTable")
     m.setMemoryAtAddress(0x0F, 0x10);
 
     SECTION("Sets sprite to proper position in graphics memory") {
-        //set the coordinate position for the sprite
-        m.setRegister(0x1, 10);
-        m.setRegister(0x2, 20);
-
-        //set the opcode to draw this sprite into location (register1, register2)
-        m.setMemoryAtAddress(0x200, 0xD1);
-        m.setMemoryAtAddress(0x201, 0x24);
-        m.fetchOpcode();
-
-        opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
-        
-        //check that this sprite was rendered properly in graphics memory
-        bool spriteFirstRow[8]  = {0,0,0,1,0,0,0,0};
-        bool spriteSecondRow[8] = {0,0,1,1,1,0,0,0};
-        bool spriteThirdRow[8]  = {0,1,1,1,1,1,0,0};
-        bool spriteFourthRow[8] = {1,1,1,1,1,1,1,0};
-        bool firstRowOfSpriteRenderedCorrectly = true;
-        bool secondRowOfSpriteRenderedCorrectly = true;
-        bool thirdRowOfSpriteRenderedCorrectly = true;
-        bool fourthRowOfSpriteRenderedCorrectly = true;
-        unsigned char *graphics = m.getGraphics();
-
-        // printGraphicsArrayToConsole(graphics);
-
-        for (int i = 0; i < 8; ++i) {
-            if (graphics[1290 + i] != spriteFirstRow[i]) {
-                firstRowOfSpriteRenderedCorrectly = false;
-            }
-
-            if (graphics[1354 + i] != spriteSecondRow[i]) {
-                secondRowOfSpriteRenderedCorrectly = false;
-            }
-
-            if (graphics[1418 + i] != spriteThirdRow[i]) {
-                thirdRowOfSpriteRenderedCorrectly = false;
-            }
-
-            if (graphics[1482 + i] != spriteFourthRow[i]) {
-                fourthRowOfSpriteRenderedCorrectly = false;
-            }
-        }
-
-        CHECK(firstRowOfSpriteRenderedCorrectly == true);
-        CHECK(secondRowOfSpriteRenderedCorrectly == true);
-        CHECK(thirdRowOfSpriteRenderedCorrectly == true);
-        CHECK(fourthRowOfSpriteRenderedCorrectly == true);
+        // //set the coordinate position for the sprite
+        // m.setRegister(0x1, 10);
+        // m.setRegister(0x2, 20);
+        //
+        // //set the opcode to draw this sprite into location (register1, register2)
+        // m.setMemoryAtAddress(0x200, 0xD1);
+        // m.setMemoryAtAddress(0x201, 0x24);
+        // m.fetchOpcode();
+        //
+        // opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+        //
+        // //check that this sprite was rendered properly in graphics memory
+        // bool spriteFirstRow[8]  = {0,0,0,1,0,0,0,0};
+        // bool spriteSecondRow[8] = {0,0,1,1,1,0,0,0};
+        // bool spriteThirdRow[8]  = {0,1,1,1,1,1,0,0};
+        // bool spriteFourthRow[8] = {1,1,1,1,1,1,1,0};
+        // bool firstRowOfSpriteRenderedCorrectly = true;
+        // bool secondRowOfSpriteRenderedCorrectly = true;
+        // bool thirdRowOfSpriteRenderedCorrectly = true;
+        // bool fourthRowOfSpriteRenderedCorrectly = true;
+        // unsigned char *graphics = m.getGraphics();
+        //
+        // // printGraphicsArrayToConsole(graphics);
+        //
+        // for (int i = 0; i < 8; ++i) {
+        //     if (graphics[1290 + i] != spriteFirstRow[i]) {
+        //         firstRowOfSpriteRenderedCorrectly = false;
+        //     }
+        //
+        //     if (graphics[1354 + i] != spriteSecondRow[i]) {
+        //         secondRowOfSpriteRenderedCorrectly = false;
+        //     }
+        //
+        //     if (graphics[1418 + i] != spriteThirdRow[i]) {
+        //         thirdRowOfSpriteRenderedCorrectly = false;
+        //     }
+        //
+        //     if (graphics[1482 + i] != spriteFourthRow[i]) {
+        //         fourthRowOfSpriteRenderedCorrectly = false;
+        //     }
+        // }
+        //
+        // CHECK(firstRowOfSpriteRenderedCorrectly == true);
+        // CHECK(secondRowOfSpriteRenderedCorrectly == true);
+        // CHECK(thirdRowOfSpriteRenderedCorrectly == true);
+        // CHECK(fourthRowOfSpriteRenderedCorrectly == true);
 
     }
 
     SECTION("Sets collision detection flag when sprites collide") {
-        //Draw triangle
-        m.setRegister(0x0, 5);
-        m.setRegister(0x1, 10);
-        m.setIndex(0x00);
-        m.setMemoryAtAddress(0x200, 0xD0);
-        m.setMemoryAtAddress(0x201, 0x14);
-        m.fetchOpcode();
-        opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
-
-        //Draw square
-        m.setRegister(0x0, 25);
-        m.setRegister(0x1, 15);
-        m.setIndex(0x04);
-        m.setMemoryAtAddress(0x202, 0xD0);
-        m.setMemoryAtAddress(0x203, 0x15);
-        m.fetchOpcode();
-        opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
-
-        //Draw diamond
-        m.setRegister(0x0, 15);
-        m.setRegister(0x1, 0);
-        m.setIndex(0x09);
-        m.setMemoryAtAddress(0x204, 0xD0);
-        m.setMemoryAtAddress(0x205, 0x17);
-        m.fetchOpcode();
-        opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
-
-        // printGraphicsArrayToConsole(m.getGraphics());
-
-        //Check that collision detection flag not set
-        //(the sprites rendered above should not actually overlap)
-        CHECK(m.getRegister(0xF) == 0);
-
-        //Now, test collision flag is set when sprites are colliding
-        m.flushGraphics();
-
-        //draw triangle
-        m.setRegister(0x0, 30);
-        m.setRegister(0x1, 10);
-        m.setIndex(0x00);
-        m.setMemoryAtAddress(0x206, 0xD0);
-        m.setMemoryAtAddress(0x207, 0x14);
-        m.fetchOpcode();
-        opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
-
-        //draw square overlapping part of triangle
-        m.setRegister(0x0, 26);
-        m.setRegister(0x1, 10);
-        m.setIndex(0x04);
-        m.setMemoryAtAddress(0x208, 0xD0);
-        m.setMemoryAtAddress(0x209, 0x15);
-        m.fetchOpcode();
-        opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
-
-        // printGraphicsArrayToConsole(m.getGraphics());
-
-        CHECK(m.getRegister(0xF) == 1);
+        // //Draw triangle
+        // m.setRegister(0x0, 5);
+        // m.setRegister(0x1, 10);
+        // m.setIndex(0x00);
+        // m.setMemoryAtAddress(0x200, 0xD0);
+        // m.setMemoryAtAddress(0x201, 0x14);
+        // m.fetchOpcode();
+        // opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+        //
+        // //Draw square
+        // m.setRegister(0x0, 25);
+        // m.setRegister(0x1, 15);
+        // m.setIndex(0x04);
+        // m.setMemoryAtAddress(0x202, 0xD0);
+        // m.setMemoryAtAddress(0x203, 0x15);
+        // m.fetchOpcode();
+        // opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+        //
+        // //Draw diamond
+        // m.setRegister(0x0, 15);
+        // m.setRegister(0x1, 0);
+        // m.setIndex(0x09);
+        // m.setMemoryAtAddress(0x204, 0xD0);
+        // m.setMemoryAtAddress(0x205, 0x17);
+        // m.fetchOpcode();
+        // opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+        //
+        // // printGraphicsArrayToConsole(m.getGraphics());
+        //
+        // //Check that collision detection flag not set
+        // //(the sprites rendered above should not actually overlap)
+        // CHECK(m.getRegister(0xF) == 0);
+        //
+        // //Now, test collision flag is set when sprites are colliding
+        // m.flushGraphics();
+        //
+        // //draw triangle
+        // m.setRegister(0x0, 30);
+        // m.setRegister(0x1, 10);
+        // m.setIndex(0x00);
+        // m.setMemoryAtAddress(0x206, 0xD0);
+        // m.setMemoryAtAddress(0x207, 0x14);
+        // m.fetchOpcode();
+        // opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+        //
+        // //draw square overlapping part of triangle
+        // m.setRegister(0x0, 26);
+        // m.setRegister(0x1, 10);
+        // m.setIndex(0x04);
+        // m.setMemoryAtAddress(0x208, 0xD0);
+        // m.setMemoryAtAddress(0x209, 0x15);
+        // m.fetchOpcode();
+        // opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+        //
+        // // printGraphicsArrayToConsole(m.getGraphics());
+        //
+        // CHECK(m.getRegister(0xF) == 1);
     }
 
     SECTION("Sets draw flag to true when called") {
-        m.setRegister(0x0, 0x00);
-        m.setRegister(0x1, 0x00);
-        m.setIndex(0x00);
-        m.setMemoryAtAddress(0x200, 0xD0);
-        m.setMemoryAtAddress(0x201, 0x11);
-        m.fetchOpcode();
-        opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
-
-        CHECK(m.getDrawFlag() == true);
+        // m.setRegister(0x0, 0x00);
+        // m.setRegister(0x1, 0x00);
+        // m.setIndex(0x00);
+        // m.setMemoryAtAddress(0x200, 0xD0);
+        // m.setMemoryAtAddress(0x201, 0x11);
+        // m.fetchOpcode();
+        // opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+        //
+        // CHECK(m.getDrawFlag() == true);
     }
 
     SECTION("Increments program counter as expected") {
-        m.setRegister(0x0, 0x00);
-        m.setRegister(0x1, 0x00);
-        m.setIndex(0x00);
-        m.setMemoryAtAddress(0x200, 0xD0);
-        m.setMemoryAtAddress(0x201, 0x11);
-        m.fetchOpcode();
-        opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
-
-        CHECK(m.getProgramCounter() == 0x202);
+        // m.setRegister(0x0, 0x00);
+        // m.setRegister(0x1, 0x00);
+        // m.setIndex(0x00);
+        // m.setMemoryAtAddress(0x200, 0xD0);
+        // m.setMemoryAtAddress(0x201, 0x11);
+        // m.fetchOpcode();
+        // opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+        //
+        // CHECK(m.getProgramCounter() == 0x202);
     }
 
     SECTION("Sets sprite properly when sprite travels outside window bounds in x-direction") {
         m.setRegister(0x0, 60);
-        m.setRegister(0x1, 27);
+        m.setRegister(0x1, 5);
         m.setIndex(0x04);
         m.setMemoryAtAddress(0x200, 0xD0);
         m.setMemoryAtAddress(0x201, 0x15);
@@ -815,18 +815,18 @@ TEST_CASE("test 0xDXYN handler", "OpcodeTable")
         opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
 
         //TODO: the actual assertions :P
-        // prettyPrintGraphicsArrayToConsole(m.getGraphics());
+        prettyPrintGraphicsArrayToConsole(m.getGraphics());
     }
 
     SECTION("Sets sprite properly when sprite travels outside window bounds in y-direction") {
-        m.setRegister(0x0, 30);
-        m.setRegister(0x1, 30);
-        m.setIndex(0x04);
-        m.setMemoryAtAddress(0x200, 0xD0);
-        m.setMemoryAtAddress(0x201, 0x15);
-        m.fetchOpcode();
-        opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+        // m.setRegister(0x0, 30);
+        // m.setRegister(0x1, 30);
+        // m.setIndex(0x04);
+        // m.setMemoryAtAddress(0x200, 0xD0);
+        // m.setMemoryAtAddress(0x201, 0x15);
+        // m.fetchOpcode();
+        // opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
 
-        prettyPrintGraphicsArrayToConsole(m.getGraphics());
+        // prettyPrintGraphicsArrayToConsole(m.getGraphics());
     }
 }

@@ -489,22 +489,32 @@ void OpcodeTable::opcode0xDXYN()
     unsigned char x = (opcode & 0x0F00) >> 8;
     unsigned char y = (opcode & 0x00F0) >> 4;
     unsigned char n = opcode & 0x000F;
-    bool collisionDetected = false;
+    unsigned short drawCoordinate = (memory.getRegister(y) * 64) + memory.getRegister(x);
+    //NEW FUNCTION BODY
+    bool collisionDetected = memory.setGraphicsAtAddress(
+        drawCoordinate,
+        memory.getMemoryAtAddress(memory.getIndex()),
+        n
+    );
 
-    unsigned short startCoordinate = (memory.getRegister(y) * 64) + memory.getRegister(x);
-
-    for (int i = 0; i < n; ++i) {
-        if ((startCoordinate + (i * 64)) > 2047) {
-            startCoordinate %= 64;
-        }
-        //write byte-by-byte to graphics array 
-        if (memory.setGraphicsAtAddress(startCoordinate + (i * 64), memory.getRegister(y) + i, memory.getMemoryAtAddress(memory.getIndex() + i)) == true) {
-            collisionDetected = true;
-        }
-    }
+    //OLD FUNCTION BODY
+    // bool collisionDetected = false;
+    //
+    // unsigned short startCoordinate = (memory.getRegister(y) * 64) + memory.getRegister(x);
+    //
+    // for (int i = 0; i < n; ++i) {
+    //     if ((startCoordinate + (i * 64)) > 2047) {
+    //         startCoordinate %= 64;
+    //     }
+    //     //write byte-by-byte to graphics array 
+    //     if (memory.setGraphicsAtAddress(startCoordinate + (i * 64), memory.getRegister(y) + i, memory.getMemoryAtAddress(memory.getIndex() + i)) == true) {
+    //         collisionDetected = true;
+    //     }
+    // }
+    //
+    // memory.setRegister(0xF, collisionDetected);
 
     memory.setRegister(0xF, collisionDetected);
-
     memory.setDrawFlag(true);
     memory.advanceToNextInstruction();
 }

@@ -1,4 +1,5 @@
 #include <memory.h>
+#include <iostream>
 
 Memory::Memory()
 {
@@ -140,25 +141,42 @@ void Memory::setDrawFlag(bool flag)
  * graphics array from 1 to 0. Otherwise, this returns false (collision not
  * detected)
  */
-bool Memory::setGraphicsAtAddress(unsigned short address, unsigned char startRow, unsigned char value)
+// bool Memory::setGraphicsAtAddress(unsigned short address, unsigned char startRow, unsigned char value)
+bool Memory::setGraphicsAtAddress(unsigned short drawAddress, unsigned short spriteAddress, unsigned char spriteHeight)
 {
+    //REWRITE
+    unsigned char currentSpriteRow = 0;
+    unsigned char currentBitOfSpriteRow = 0;
     bool collidedWithPixel = false;
-    bool wrappedToLeftSide = false;
+    bool wrappedAroundHorizontally = false;
+    bool wrappedAroundVertically = false;
+    unsigned short rowOffset = 0;
+    int startRow = drawAddress / 64;
 
-    for (int i = 0; i < 8; ++i) {
-        //Check if the next pixel we are going to write is going to be placed
-        //on a different row than the starRow. If it is, we need to subtract
-        //one row-width (64) from address. This will cause us to "wrap" the
-        //row from the right side of the screen to the left side.
-        if (wrappedToLeftSide != true && (((address + i) / 64) != startRow)) {
-            address -= 64;
-            wrappedToLeftSide = true;
+    for (int row = 0; row < spriteHeight; row++) { //vertical loop
+        currentSpriteRow = getMemoryAtAddress(getIndex() + row);
+        rowOffset = row * 64;
+        //TODO: check for vertical wrap-around
+
+        if (wrappedAroundHorizontally == true) {
+            wrappedAroundHorizontally = false;
+            drawAddress += 64;
         }
-        
-        graphics[address + i] ^= ((value >> (7 - i)) & 0x01);
 
-        if (graphics[address + i] != ((value >> (7 - i)) & 0x01)) {
-            collidedWithPixel = true;
+        for (int column = 0; column < 8; column++) { //sprites are always 8 bits wide
+            if (wrappedAroundHorizontally == false && ((int)((drawAddress + column + rowOffset) / 64) > startRow + row)) {
+                wrappedAroundHorizontally = true;
+                drawAddress -= 64;
+
+                std::cout << "got here!" << std::endl;
+            }
+
+            currentBitOfSpriteRow = ((currentSpriteRow >> (7 - column)) & 0x01);
+            graphics[drawAddress + column + rowOffset] ^= currentBitOfSpriteRow;
+
+            if (collidedWithPixel == false && (graphics[drawAddress + column + rowOffset] != currentBitOfSpriteRow)) {
+                collidedWithPixel = true;
+            }
         }
     }
 
