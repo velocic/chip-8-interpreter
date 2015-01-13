@@ -139,12 +139,10 @@ void Memory::setDrawFlag(bool flag)
  * XORs each bit of value into graphics[address] to graphics[address+8].
  * Returns true (collision detected) if this operation flips a bit in the
  * graphics array from 1 to 0. Otherwise, this returns false (collision not
- * detected)
+ * detected).
  */
-// bool Memory::setGraphicsAtAddress(unsigned short address, unsigned char startRow, unsigned char value)
-bool Memory::setGraphicsAtAddress(unsigned short drawAddress, unsigned short spriteAddress, unsigned char spriteHeight)
+bool Memory::drawSpriteAtAddress(unsigned short drawAddress, unsigned short spriteAddress, unsigned char spriteHeight)
 {
-    //REWRITE
     unsigned char currentSpriteRow = 0;
     unsigned char currentBitOfSpriteRow = 0;
     bool collidedWithPixel = false;
@@ -176,13 +174,14 @@ bool Memory::setGraphicsAtAddress(unsigned short drawAddress, unsigned short spr
             if (wrappedAroundHorizontally == false && ((int)((drawAddress + column + rowOffset) / 64) > startRow + row)) {
                 wrappedAroundHorizontally = true;
                 drawAddress -= 64;
-
-                std::cout << "got here!" << std::endl;
             }
 
+            // std::cout << (drawAddress + column + rowOffset) << std::endl;
+            std::cout << drawAddress << std::endl;
             currentBitOfSpriteRow = ((currentSpriteRow >> (7 - column)) & 0x01);
             graphics[drawAddress + column + rowOffset] ^= currentBitOfSpriteRow;
 
+            //collision detection check
             if (collidedWithPixel == false && (graphics[drawAddress + column + rowOffset] != currentBitOfSpriteRow)) {
                 collidedWithPixel = true;
             }
