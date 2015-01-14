@@ -153,18 +153,10 @@ bool Memory::drawSpriteAtAddress(unsigned short drawAddress, unsigned short spri
     int columnOffset = 0;
     int rowOffsetMultiplier = 0;
 
-    // for (int row = 0; row < spriteHeight; row++) { //vertical loop
-    for (int row = 0; row < 3; row++) { //vertical loop
+    for (int row = 0; row < spriteHeight; row++) { //vertical loop
         currentSpriteRow = getMemoryAtAddress(getIndex() + row);
 
         rowOffset = rowOffsetMultiplier++ * 64;
-
-        //vertical wrap-around check
-        if ((drawAddress + rowOffset) > 2047) {
-            drawAddress %= 64;
-            rowOffsetMultiplier = 1;
-            rowOffset = 0;
-        }
 
         //reset after horizontal wrap on previous row
         if (wrappedAroundHorizontally == true) {
@@ -172,15 +164,21 @@ bool Memory::drawSpriteAtAddress(unsigned short drawAddress, unsigned short spri
             drawAddress = tempDrawAddress;
         }
 
+        //vertical wrap-around check
+        if ((drawAddress + rowOffset) > 2047) {
+            drawAddress %= 64;
+            rowOffsetMultiplier = 1;
+            rowOffset = 0;
+            startRow = 0;
+        }
         columnOffset = 0; //reset the columnOffset every time we finish printing a whole row
 
         for (int column = 0; column < 8; column++) { //sprites are always 8 bits wide
-            if (wrappedAroundHorizontally == false && ((int)((drawAddress + columnOffset + rowOffset) / 64) > startRow + row)) {
+            if (wrappedAroundHorizontally == false && ((int)((drawAddress + columnOffset + rowOffset) / 64) > startRow + rowOffset)) {
                 tempDrawAddress = drawAddress;
                 if (drawAddress > 64) { //subtract one row-width if we are not on the first row
-                    // drawAddress -= 64;
                     drawAddress -= (64 - columnOffset);
-                } else { //we are on the first row, so just start drawing from position 0
+                } else { //we are on the first row, so just start counting from position 0
                     drawAddress = 0;
                 }
                 wrappedAroundHorizontally = true;
