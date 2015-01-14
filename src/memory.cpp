@@ -147,12 +147,14 @@ bool Memory::drawSpriteAtAddress(unsigned short drawAddress, unsigned short spri
     unsigned char currentBitOfSpriteRow = 0;
     bool collidedWithPixel = false;
     bool wrappedAroundHorizontally = false;
-    bool wrappedAroundVertically = false;
     unsigned short rowOffset = 0;
+    unsigned short tempDrawAddress = 0;
     int startRow = drawAddress / 64;
+    int columnOffset = 0;
     int rowOffsetMultiplier = 0;
 
-    for (int row = 0; row < spriteHeight; row++) { //vertical loop
+    // for (int row = 0; row < spriteHeight; row++) { //vertical loop
+    for (int row = 0; row < 3; row++) { //vertical loop
         currentSpriteRow = getMemoryAtAddress(getIndex() + row);
 
         rowOffset = rowOffsetMultiplier++ * 64;
@@ -167,24 +169,35 @@ bool Memory::drawSpriteAtAddress(unsigned short drawAddress, unsigned short spri
         //reset after horizontal wrap on previous row
         if (wrappedAroundHorizontally == true) {
             wrappedAroundHorizontally = false;
-            drawAddress += 64;
+            drawAddress = tempDrawAddress;
         }
 
+        columnOffset = 0; //reset the columnOffset every time we finish printing a whole row
+
         for (int column = 0; column < 8; column++) { //sprites are always 8 bits wide
-            if (wrappedAroundHorizontally == false && ((int)((drawAddress + column + rowOffset) / 64) > startRow + row)) {
+            if (wrappedAroundHorizontally == false && ((int)((drawAddress + columnOffset + rowOffset) / 64) > startRow + row)) {
+                tempDrawAddress = drawAddress;
+                if (drawAddress > 64) { //subtract one row-width if we are not on the first row
+                    // drawAddress -= 64;
+                    drawAddress -= (64 - columnOffset);
+                } else { //we are on the first row, so just start drawing from position 0
+                    drawAddress = 0;
+                }
                 wrappedAroundHorizontally = true;
-                drawAddress -= 64;
+                columnOffset = 0;
+
             }
 
-            // std::cout << (drawAddress + column + rowOffset) << std::endl;
             std::cout << drawAddress << std::endl;
             currentBitOfSpriteRow = ((currentSpriteRow >> (7 - column)) & 0x01);
-            graphics[drawAddress + column + rowOffset] ^= currentBitOfSpriteRow;
+            graphics[drawAddress + columnOffset + rowOffset] ^= currentBitOfSpriteRow;
 
             //collision detection check
-            if (collidedWithPixel == false && (graphics[drawAddress + column + rowOffset] != currentBitOfSpriteRow)) {
+            if (collidedWithPixel == false && (graphics[drawAddress + columnOffset + rowOffset] != currentBitOfSpriteRow)) {
                 collidedWithPixel = true;
             }
+
+            ++columnOffset;
         }
     }
 
