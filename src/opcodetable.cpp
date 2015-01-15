@@ -489,10 +489,11 @@ void OpcodeTable::opcode0xDXYN()
     unsigned char x = (opcode & 0x0F00) >> 8;
     unsigned char y = (opcode & 0x00F0) >> 4;
     unsigned char n = opcode & 0x000F;
-    unsigned short drawCoordinate = (memory.getRegister(y) * 64) + memory.getRegister(x);
-    bool collisionDetected = memory.drawSpriteAtAddress(
-        drawCoordinate,
-        memory.getMemoryAtAddress(memory.getIndex()),
+
+    bool collisionDetected = memory.drawSpriteAtCoordinates(
+        memory.getRegister(x),
+        memory.getRegister(y),
+        memory.getIndex(),
         n
     );
 

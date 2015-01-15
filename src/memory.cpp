@@ -139,64 +139,47 @@ void Memory::setDrawFlag(bool flag)
  * XORs each bit of value into graphics[address] to graphics[address+8].
  * Returns true (collision detected) if this operation flips a bit in the
  * graphics array from 1 to 0. Otherwise, this returns false (collision not
- * detected).
+ * detected). Additionally, support horizontal and vertical screen-wrapping
+ * if the sprite overflows horizontal or vertical screen bounds.
  */
-bool Memory::drawSpriteAtAddress(unsigned short drawAddress, unsigned short spriteAddress, unsigned char spriteHeight)
+bool Memory::drawSpriteAtCoordinates(int drawPositionX, int drawPositionY, unsigned short spriteAddress, unsigned char spriteHeight)
 {
     unsigned char currentSpriteRow = 0;
     unsigned char currentBitOfSpriteRow = 0;
     bool collidedWithPixel = false;
-    bool wrappedAroundHorizontally = false;
-    unsigned short rowOffset = 0;
-    unsigned short tempDrawAddress = 0;
-    int startRow = drawAddress / 64;
-    int columnOffset = 0;
-    int rowOffsetMultiplier = 0;
+    unsigned short calculatedOffset = 0;
+    int tempDrawPositionX = 0;
 
-    for (int row = 0; row < spriteHeight; row++) { //vertical loop
-        currentSpriteRow = getMemoryAtAddress(getIndex() + row);
-
-        rowOffset = rowOffsetMultiplier++ * 64;
-
-        //reset after horizontal wrap on previous row
-        if (wrappedAroundHorizontally == true) {
-            wrappedAroundHorizontally = false;
-            drawAddress = tempDrawAddress;
-        }
+    for (int rowLoopCounter = 0; rowLoopCounter < spriteHeight; ++rowLoopCounter)
+    {
+        currentSpriteRow = getMemoryAtAddress(getIndex() + rowLoopCounter);
 
         //vertical wrap-around check
-        if ((drawAddress + rowOffset) > 2047) {
-            drawAddress %= 64;
-            rowOffsetMultiplier = 1;
-            rowOffset = 0;
-            startRow = 0;
+        if (drawPositionY > 31) { //total number of rows (counting from 0)
+            drawPositionY = 0;
         }
-        columnOffset = 0; //reset the columnOffset every time we finish printing a whole row
 
-        for (int column = 0; column < 8; column++) { //sprites are always 8 bits wide
-            if (wrappedAroundHorizontally == false && ((int)((drawAddress + columnOffset + rowOffset) / 64) > startRow + rowOffset)) {
-                tempDrawAddress = drawAddress;
-                if (drawAddress > 64) { //subtract one row-width if we are not on the first row
-                    drawAddress -= (64 - columnOffset);
-                } else { //we are on the first row, so just start counting from position 0
-                    drawAddress = 0;
-                }
-                wrappedAroundHorizontally = true;
-                columnOffset = 0;
-
+        tempDrawPositionX = drawPositionX;
+        for (int columnLoopCounter = 0; columnLoopCounter < 8; ++columnLoopCounter)
+        {
+            //horizontal wrap-around check
+            if (tempDrawPositionX > 63) { //one column-width (counting from 0)
+                tempDrawPositionX = 0;
             }
 
-            std::cout << drawAddress << std::endl;
-            currentBitOfSpriteRow = ((currentSpriteRow >> (7 - column)) & 0x01);
-            graphics[drawAddress + columnOffset + rowOffset] ^= currentBitOfSpriteRow;
+            currentBitOfSpriteRow = ((currentSpriteRow >> (7 - columnLoopCounter)) & 0x01);
+            calculatedOffset = (drawPositionY * 64) + tempDrawPositionX; //translate coordinates to 1d array offset
+            graphics[calculatedOffset] ^= currentBitOfSpriteRow;
 
             //collision detection check
-            if (collidedWithPixel == false && (graphics[drawAddress + columnOffset + rowOffset] != currentBitOfSpriteRow)) {
+            if (graphics[calculatedOffset] != currentBitOfSpriteRow) {
                 collidedWithPixel = true;
             }
 
-            ++columnOffset;
+            ++tempDrawPositionX;
         }
+
+        ++drawPositionY;
     }
 
     return collidedWithPixel;
