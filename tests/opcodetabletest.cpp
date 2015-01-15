@@ -899,3 +899,213 @@ TEST_CASE("test 0xDXYN handler", "OpcodeTable")
         // prettyPrintGraphicsArrayToConsole(m.getGraphics());
     }
 }
+
+
+TEST_CASE("test 0xEX9E handler", "OpcodeTable")
+{
+    //0xEX9E opcode handler not yet implemented
+}
+
+TEST_CASE("test 0xEXA1 handler", "OpcodeTable")
+{
+    //0xEXA1 opcode handler not yet implemented
+}
+
+//Register X should contain the value of the delay timer
+TEST_CASE("test 0xFX07 handler", "OpcodeTable")
+{
+    Memory m;
+    OpcodeTable opcodeTable(m);
+
+    m.setMemoryAtAddress(0x200, 0xF3);
+    m.setMemoryAtAddress(0x201, 0x07);
+    m.setDelayTimer(0x5A);
+    m.fetchOpcode();
+    opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+
+    CHECK(m.getRegister(0x3) == 0x5A);
+    CHECK(m.getProgramCounter() == 0x202);
+}
+
+//Program should wait for user input, then store the pressed key value in register X
+TEST_CASE("test 0xFX0A handler", "OpcodeTable")
+{
+    //this handler not yet implemented
+}
+
+//Delay timer should be set to register X
+TEST_CASE("test 0xFX15 handler", "OpcodeTable")
+{
+    Memory m;
+    OpcodeTable opcodeTable(m);
+
+    m.setMemoryAtAddress(0x200, 0xF2);
+    m.setMemoryAtAddress(0x201, 0x15);
+    m.setRegister(2, 0x05);
+    m.fetchOpcode();
+    opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+
+    CHECK(m.getDelayTimer() == 0x05);
+    CHECK(m.getProgramCounter() == 0x202);
+}
+
+//Sound timer should contain the value of register X
+TEST_CASE("test 0xFX18 handler", "OpcodeTable")
+{
+    Memory m;
+    OpcodeTable opcodeTable(m);
+
+    m.setMemoryAtAddress(0x200, 0xFB);
+    m.setMemoryAtAddress(0x201, 0x18);
+    m.setRegister(0xB, 0xB0);
+    m.fetchOpcode();
+    opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+
+    CHECK(m.getSoundTimer() == 0xB0);
+    CHECK(m.getProgramCounter() == 0x202);
+}
+
+//Index should contain the sum of Index and register X
+TEST_CASE("test 0xFX1E handler", "OpcodeTable")
+{
+    Memory m;
+    OpcodeTable opcodeTable(m);
+
+    m.setMemoryAtAddress(0x200, 0xF9);
+    m.setMemoryAtAddress(0x201, 0x1E);
+    m.setIndex(0xFCB);
+    m.setRegister(0x9, 0x03);
+    m.fetchOpcode();
+    opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+
+    CHECK(m.getIndex() == 0xFCE);
+    CHECK(m.getProgramCounter() == 0x202);
+}
+
+//Index should contain the location of the sprite
+//for the digit specified by register X
+TEST_CASE("test 0xFX29 handler", "OpcodeTable")
+{
+    //this handler not yet implemented
+}
+
+//Memory locations Index, Index+1, and Index+2 should contain
+//the Binary-Coded Decimal representation of the value held in
+//register X
+TEST_CASE("test 0xFX33 handler", "OpcodeTable")
+{
+    Memory m;
+    OpcodeTable opcodeTable(m);
+
+    m.setMemoryAtAddress(0x200, 0xF0);
+    m.setMemoryAtAddress(0x201, 0x33);
+    m.setIndex(0xBC3);
+    m.setRegister(0x0, 135);
+    m.fetchOpcode();
+    opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+
+    CHECK(m.getMemoryAtAddress(0xBC3) == 1);
+    CHECK(m.getMemoryAtAddress(0xBC4) == 3);
+    CHECK(m.getMemoryAtAddress(0xBC5) == 5);
+    CHECK(m.getProgramCounter() == 0x202);
+}
+
+//Registers 0 - X should be stored into memory, starting
+//at the location pointed to by Index
+TEST_CASE("test 0xFX55 handler", "OpcodeTable")
+{
+    Memory m;
+    OpcodeTable opcodeTable(m);
+
+    m.setMemoryAtAddress(0x200, 0xFF);
+    m.setMemoryAtAddress(0x201, 0x55);
+    m.setIndex(0xA20);
+    m.setRegister(0x0, 0x0F);
+    m.setRegister(0x1, 0x0E);
+    m.setRegister(0x2, 0x0D);
+    m.setRegister(0x3, 0x0C);
+    m.setRegister(0x4, 0x0B);
+    m.setRegister(0x5, 0x0A);
+    m.setRegister(0x6, 0x09);
+    m.setRegister(0x7, 0x08);
+    m.setRegister(0x8, 0x07);
+    m.setRegister(0x9, 0x06);
+    m.setRegister(0xA, 0x05);
+    m.setRegister(0xB, 0x04);
+    m.setRegister(0xC, 0x03);
+    m.setRegister(0xD, 0x02);
+    m.setRegister(0xE, 0x01);
+    m.setRegister(0xF, 0xFF);
+    m.fetchOpcode();
+    opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+
+    CHECK(m.getMemoryAtAddress(0xA20) == 0x0F);
+    CHECK(m.getMemoryAtAddress(0xA21) == 0x0E);
+    CHECK(m.getMemoryAtAddress(0xA22) == 0x0D);
+    CHECK(m.getMemoryAtAddress(0xA23) == 0x0C);
+    CHECK(m.getMemoryAtAddress(0xA24) == 0x0B);
+    CHECK(m.getMemoryAtAddress(0xA25) == 0x0A);
+    CHECK(m.getMemoryAtAddress(0xA26) == 0x09);
+    CHECK(m.getMemoryAtAddress(0xA27) == 0x08);
+    CHECK(m.getMemoryAtAddress(0xA28) == 0x07);
+    CHECK(m.getMemoryAtAddress(0xA29) == 0x06);
+    CHECK(m.getMemoryAtAddress(0xA2A) == 0x05);
+    CHECK(m.getMemoryAtAddress(0xA2B) == 0x04);
+    CHECK(m.getMemoryAtAddress(0xA2C) == 0x03);
+    CHECK(m.getMemoryAtAddress(0xA2D) == 0x02);
+    CHECK(m.getMemoryAtAddress(0xA2E) == 0x01);
+    CHECK(m.getMemoryAtAddress(0xA2F) == 0xFF);
+
+    CHECK(m.getProgramCounter() == 0x202);
+}
+
+//Starting at the memory location pointed to by Index,
+//store those values into registers 0 - X
+TEST_CASE("test 0xFX65 handler", "OpcodeTable")
+{
+    Memory m;
+    OpcodeTable opcodeTable(m);
+
+    m.setMemoryAtAddress(0x200, 0xFF);
+    m.setMemoryAtAddress(0x201, 0x65);
+    m.setIndex(0xB20);
+
+    m.setMemoryAtAddress(0xB20, 0x0F);
+    m.setMemoryAtAddress(0xB21, 0x0E);
+    m.setMemoryAtAddress(0xB22, 0x0D);
+    m.setMemoryAtAddress(0xB23, 0x0C);
+    m.setMemoryAtAddress(0xB24, 0x0B);
+    m.setMemoryAtAddress(0xB25, 0x0A);
+    m.setMemoryAtAddress(0xB26, 0x09);
+    m.setMemoryAtAddress(0xB27, 0x08);
+    m.setMemoryAtAddress(0xB28, 0x07);
+    m.setMemoryAtAddress(0xB29, 0x06);
+    m.setMemoryAtAddress(0xB2A, 0x05);
+    m.setMemoryAtAddress(0xB2B, 0x04);
+    m.setMemoryAtAddress(0xB2C, 0x03);
+    m.setMemoryAtAddress(0xB2D, 0x02);
+    m.setMemoryAtAddress(0xB2E, 0x01);
+    m.setMemoryAtAddress(0xB2F, 0xFF);
+
+    m.fetchOpcode();
+    opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+
+    CHECK(m.getRegister(0x0) == 0x0F);
+    CHECK(m.getRegister(0x1) == 0x0E);
+    CHECK(m.getRegister(0x2) == 0x0D);
+    CHECK(m.getRegister(0x3) == 0x0C);
+    CHECK(m.getRegister(0x4) == 0x0B);
+    CHECK(m.getRegister(0x5) == 0x0A);
+    CHECK(m.getRegister(0x6) == 0x09);
+    CHECK(m.getRegister(0x7) == 0x08);
+    CHECK(m.getRegister(0x8) == 0x07);
+    CHECK(m.getRegister(0x9) == 0x06);
+    CHECK(m.getRegister(0xA) == 0x05);
+    CHECK(m.getRegister(0xB) == 0x04);
+    CHECK(m.getRegister(0xC) == 0x03);
+    CHECK(m.getRegister(0xD) == 0x02);
+    CHECK(m.getRegister(0xE) == 0x01);
+    CHECK(m.getRegister(0xF) == 0xFF);
+
+    CHECK(m.getProgramCounter() == 0x202);
+}
