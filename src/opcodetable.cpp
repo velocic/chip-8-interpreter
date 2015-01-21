@@ -1,9 +1,9 @@
 #include <opcodetable.h>
 
-// OpcodeTable::OpcodeTable()
-// {
-//     initializeOpcodeJumpTable();
-// }
+void OpcodeTable::decodeAndExecuteOpcode(unsigned short opcode)
+{
+    (this->*opcodeJumpTable[opcode >> 8])();
+}
 
 void OpcodeTable::initializeOpcodeJumpTable()
 {
@@ -485,7 +485,19 @@ void OpcodeTable::opcode0xCXNN()
  */
 void OpcodeTable::opcode0xDXYN()
 {
-    //TODO: place sprite into graphics buffer
+    unsigned short opcode = memory.getCurrentOpcode();
+    unsigned char x = (opcode & 0x0F00) >> 8;
+    unsigned char y = (opcode & 0x00F0) >> 4;
+    unsigned char n = opcode & 0x000F;
+
+    bool collisionDetected = memory.drawSpriteAtCoordinates(
+        memory.getRegister(x),
+        memory.getRegister(y),
+        memory.getIndex(),
+        n
+    );
+
+    memory.setRegister(0xF, collisionDetected);
     memory.setDrawFlag(true);
     memory.advanceToNextInstruction();
 }

@@ -1,9 +1,5 @@
 #include <memory.h>
-
-Memory::Memory()
-{
-    //TODO: initialize all class members
-}
+#include <iostream>
 
 void Memory::advanceToNextInstruction()
 {
@@ -12,7 +8,8 @@ void Memory::advanceToNextInstruction()
 
 void Memory::fetchOpcode()
 {
-    opcode = memory[programCounter];
+    opcode = memory[programCounter] << 8;
+    opcode |= memory[programCounter+1];
 }
 
 void Memory::flushGraphics()
@@ -37,9 +34,19 @@ bool Memory::getDrawFlag()
     return drawFlag;
 }
 
+unsigned char (&Memory::getGraphics())[2048]
+{
+    return graphics;
+}
+
 unsigned short Memory::getIndex()
 {
     return index;
+}
+
+unsigned char (&Memory::getKeypadState())[16]
+{
+    return keypad;
 }
 
 unsigned char Memory::getMemoryAtAddress(unsigned short address)
@@ -62,6 +69,41 @@ unsigned char Memory::getRegister(unsigned char registerX)
 unsigned char Memory::getSoundTimer()
 {
     return soundTimer;
+}
+
+void Memory::initialize(std::vector<unsigned char> gameROM)
+{
+    opcode = 0;
+    flushGraphics();
+
+    //zero-out the arrays
+    for (int i = 0; i < 4096; ++i) {
+        memory[i] = 0;
+
+        if (i < 16) {
+            stack[i] = 0;
+            keypad[i] = 0;
+            v[i] = 0;
+        }
+    }
+
+    stackPointer = -1;
+    index = 0;
+
+    //programs start at 0x200, memory below that reserved for the interpreter
+    programCounter = 0x200;
+    delayTimer = 0;
+    soundTimer = 0;
+
+    //Load the font-set into memory (memory 0x050 - 0x0A0)
+    for (int i = 0; i < 80; ++i) {
+        memory[i + 0x50] = fontSet[i];
+    }
+
+    //Load the program into memory (memory 0x200 - 0xFFF)
+    for (std::vector<unsigned char>::size_type i = 0; i < gameROM.size(); ++i) {
+        memory[i + 0x200] = gameROM[i];
+    }
 }
 
 bool Memory::registerEquals(unsigned char registerX, unsigned char constant)
@@ -92,6 +134,56 @@ void Memory::setDelayTimer(unsigned char time)
 void Memory::setDrawFlag(bool flag)
 {
     drawFlag = flag;
+}
+
+/*
+ * XORs each bit of value into graphics[address] to graphics[address+8].
+ * Returns true (collision detected) if this operation flips a bit in the
+ * graphics array from 1 to 0. Otherwise, this returns false (collision not
+ * detected). Additionally, support horizontal and vertical screen-wrapping
+ * if the sprite overflows horizontal or vertical screen bounds.
+ */
+bool Memory::drawSpriteAtCoordinates(int drawPositionX, int drawPositionY, unsigned short spriteAddress, unsigned char spriteHeight)
+{
+    unsigned char currentSpriteRow = 0;
+    unsigned char currentBitOfSpriteRow = 0;
+    bool collidedWithPixel = false;
+    unsigned short calculatedOffset = 0;
+    int tempDrawPositionX = 0;
+
+    for (int rowLoopCounter = 0; rowLoopCounter < spriteHeight; ++rowLoopCounter)
+    {
+        currentSpriteRow = getMemoryAtAddress(getIndex() + rowLoopCounter);
+
+        //vertical wrap-around check
+        if (drawPositionY > 31) { //total number of rows (counting from 0)
+            drawPositionY = 0;
+        }
+
+        tempDrawPositionX = drawPositionX;
+        for (int columnLoopCounter = 0; columnLoopCounter < 8; ++columnLoopCounter)
+        {
+            //horizontal wrap-around check
+            if (tempDrawPositionX > 63) { //one column-width (counting from 0)
+                tempDrawPositionX = 0;
+            }
+
+            currentBitOfSpriteRow = ((currentSpriteRow >> (7 - columnLoopCounter)) & 0x01);
+            calculatedOffset = (drawPositionY * 64) + tempDrawPositionX; //translate coordinates to 1d array offset
+            graphics[calculatedOffset] ^= currentBitOfSpriteRow;
+
+            //collision detection check
+            if (graphics[calculatedOffset] != currentBitOfSpriteRow) {
+                collidedWithPixel = true;
+            }
+
+            ++tempDrawPositionX;
+        }
+
+        ++drawPositionY;
+    }
+
+    return collidedWithPixel;
 }
 
 void Memory::setIndex(unsigned short value)
@@ -131,5 +223,6 @@ unsigned short Memory::stackPop()
 void Memory::stackPush(unsigned short value)
 {
     //TODO: handle case of full stack
-    stack[stackPointer++] = value;
+    ++stackPointer;
+    stack[stackPointer] = value;
 }
