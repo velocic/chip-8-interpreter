@@ -1,4 +1,5 @@
 #include <opcodetable.h>
+#include <iostream>
 
 void OpcodeTable::decodeAndExecuteOpcode(unsigned short opcode)
 {
@@ -569,7 +570,62 @@ void OpcodeTable::opcode0xFX1E()
 //set i to the location of the sprite for digit Vx
 void OpcodeTable::opcode0xFX29()
 {
-    //TODO: implement after setting character set into memory
+    unsigned short opcode = memory.getCurrentOpcode();
+    unsigned char x = (opcode & 0x0F00) >> 8;
+    unsigned char registerValue = memory.getRegister(x);
+
+    switch (registerValue) {
+        case 0x0:
+            memory.setIndex(0x050); //location of "0" sprite
+            break;
+        case 0x1:
+            memory.setIndex(0x055); //location of "1" sprite
+            break;
+        case 0x2:
+            memory.setIndex(0x05A); //location of "2" sprite
+            break;
+        case 0x3:
+            memory.setIndex(0x05F); //location of "3" sprite
+            break;
+        case 0x4:
+            memory.setIndex(0x064); //location of "4" sprite
+            break;
+        case 0x5:
+            memory.setIndex(0x069); //location of "5" sprite
+            break;
+        case 0x6:
+            memory.setIndex(0x06E); //location of "6" sprite
+            break;
+        case 0x7:
+            memory.setIndex(0x073); //location of "7" sprite
+            break;
+        case 0x8:
+            memory.setIndex(0x078); //location of "8" sprite
+            break;
+        case 0x9:
+            memory.setIndex(0x07D); //location of "9" sprite
+            break;
+        case 0xA:
+            memory.setIndex(0x082); //location of "A" sprite
+            break;
+        case 0xB:
+            memory.setIndex(0x087); //location of "B" sprite
+            break;
+        case 0xC:
+            memory.setIndex(0x08C); //location of "C" sprite
+            break;
+        case 0xD:
+            memory.setIndex(0x091); //location of "D" sprite
+            break;
+        case 0xE:
+            memory.setIndex(0x096); //location of "E" sprite
+            break;
+        case 0xF:
+            memory.setIndex(0x09B); //location of "F" sprite
+            break;
+    }
+
+    memory.advanceToNextInstruction();
 }
 
 //store binary-coded decimal representation of Vx in memory locations i, i+1. and i+2
