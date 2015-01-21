@@ -1,11 +1,6 @@
 #include <memory.h>
 #include <iostream>
 
-Memory::Memory()
-{
-    initialize();
-}
-
 void Memory::advanceToNextInstruction()
 {
     programCounter += 2;
@@ -76,7 +71,7 @@ unsigned char Memory::getSoundTimer()
     return soundTimer;
 }
 
-void Memory::initialize()
+void Memory::initialize(std::vector<unsigned char> gameROM)
 {
     opcode = 0;
     flushGraphics();
@@ -100,9 +95,15 @@ void Memory::initialize()
     delayTimer = 0;
     soundTimer = 0;
 
-    //TODO: Load the font-set into memory
-    //TODO: Load the program into memory
+    //Load the font-set into memory (memory 0x050 - 0x0A0)
+    for (int i = 0; i < 80; ++i) {
+        memory[i + 0x50] = fontSet[i];
+    }
 
+    //Load the program into memory (memory 0x200 - 0xFFF)
+    for (std::vector<unsigned char>::size_type i = 0; i < gameROM.size(); ++i) {
+        memory[i + 0x200] = gameROM[i];
+    }
 }
 
 bool Memory::registerEquals(unsigned char registerX, unsigned char constant)
