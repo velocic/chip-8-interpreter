@@ -192,11 +192,11 @@ void OpcodeTable::navigateOpcode0xFJumpTable()
 
 void OpcodeTable::noOp()
 {
-    /*TODO: log warning if we get into this function. If this gets called, we
+    /* log warning if we get into this function. If this gets called, we
      * either navigated the opcode table incorrectly, or the rom file called
      * an invalid entry of the table
      */
-    std::cout << "Got into noOp with opcode " << memory.getCurrentOpcode() << "." << std::endl;
+    std::cout << "Got into noOp with opcode " << std::hex << memory.getCurrentOpcode() << "." << std::endl;
     memory.advanceToNextInstruction();
 }
 
@@ -535,7 +535,6 @@ void OpcodeTable::opcode0xFX0A()
 //set the delay timer to Vx
 void OpcodeTable::opcode0xFX15()
 {
-    //TODO: need to count the timer down somehow
     unsigned short opcode = memory.getCurrentOpcode();
     unsigned char x = (opcode & 0x0F00) >> 8;
 
@@ -550,7 +549,6 @@ void OpcodeTable::opcode0xFX18()
     unsigned short opcode = memory.getCurrentOpcode();
     unsigned char x = (opcode & 0x0F00) >> 8;
 
-    //TODO: need to count the timer down somehow
     memory.setSoundTimer(memory.getRegister(x));
 
     memory.advanceToNextInstruction();
