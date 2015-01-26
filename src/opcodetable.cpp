@@ -1,5 +1,4 @@
 #include <opcodetable.h>
-#include <iostream>
 
 void OpcodeTable::decodeAndExecuteOpcode(unsigned short opcode)
 {
@@ -197,6 +196,7 @@ void OpcodeTable::noOp()
      * either navigated the opcode table incorrectly, or the rom file called
      * an invalid entry of the table
      */
+    std::cout << "Got into noOp with opcode " << memory.getCurrentOpcode() << "." << std::endl;
     memory.advanceToNextInstruction();
 }
 

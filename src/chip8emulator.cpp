@@ -38,9 +38,12 @@ int main(int argc, char* argv[])
 
     // //debug, run the emulateCycle funciton once
     // chip8.emulateCycle();
-    for (int i = 0; i < 10000; ++i) {
-        chip8.emulateCycle();
-    }
+    // for (int i = 0; i < 10000; ++i) {
+    //     chip8.emulateCycle();
+    // }
+
+    //start emulating!
+    chip8.startEmulationLoop();
 
     return 0;
 }
