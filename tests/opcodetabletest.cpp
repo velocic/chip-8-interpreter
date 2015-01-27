@@ -3,6 +3,7 @@
 #include <memory.h>
 #include <opcodetable.h>
 #include <iostream>
+#include <vector>
 
 //for visually debugging graphics
 void printGraphicsArrayToConsole(unsigned char *graphics)
@@ -54,6 +55,9 @@ TEST_CASE("Test 0x00E0 handler", "OpcodeTable")
     //Setup
     Memory m;
     OpcodeTable opcodeTable(m);
+    std::vector<unsigned char> dummyFileContents;
+    dummyFileContents.resize(0xDFF, 0);
+    m.initialize(dummyFileContents);
 
     m.setMemoryAtAddress(0x200, 0x00);
     m.setMemoryAtAddress(0x201, 0xE0);
@@ -85,6 +89,9 @@ TEST_CASE("test 0x00EE handler", "OpcodeTable")
     //Setup
     Memory m;
     OpcodeTable opcodeTable(m);
+    std::vector<unsigned char> dummyFileContents;
+    dummyFileContents.resize(0xDFF, 0);
+    m.initialize(dummyFileContents);
 
     m.setMemoryAtAddress(0x200, 0x00);
     m.setMemoryAtAddress(0x201, 0xEE);
@@ -106,6 +113,9 @@ TEST_CASE("test 0x1NNN handler", "OpcodeTable")
 {
     Memory m;
     OpcodeTable opcodeTable(m);
+    std::vector<unsigned char> dummyFileContents;
+    dummyFileContents.resize(0xDFF, 0);
+    m.initialize(dummyFileContents);
 
     m.setMemoryAtAddress(0x200, 0x12);
     m.setMemoryAtAddress(0x201, 0x33);
@@ -130,6 +140,9 @@ TEST_CASE("test 0x2NNN handler", "OpcodeTable")
 {
     Memory m;
     OpcodeTable opcodeTable(m);
+    std::vector<unsigned char> dummyFileContents;
+    dummyFileContents.resize(0xDFF, 0);
+    m.initialize(dummyFileContents);
 
     m.setMemoryAtAddress(0x200, 0x25);
     m.setMemoryAtAddress(0x201, 0xAC);
@@ -148,6 +161,9 @@ TEST_CASE("test 0x3XNN handler", "OpcodeTable")
 {
     Memory m;
     OpcodeTable opcodeTable(m);
+    std::vector<unsigned char> dummyFileContents;
+    dummyFileContents.resize(0xDFF, 0);
+    m.initialize(dummyFileContents);
 
     m.setRegister(0xA, 0x83);
     m.setMemoryAtAddress(0x200, 0x3A);
@@ -173,6 +189,9 @@ TEST_CASE("test 0x4XNN handler", "OpcodeTable")
 {
     Memory m;
     OpcodeTable opcodeTable(m);
+    std::vector<unsigned char> dummyFileContents;
+    dummyFileContents.resize(0xDFF, 0);
+    m.initialize(dummyFileContents);
 
     m.setRegister(0xF, 0xFF);
     m.setMemoryAtAddress(0x200, 0x4F);
@@ -199,6 +218,9 @@ TEST_CASE("test 0x5XY0 handler", "OpcodeTable")
 {
     Memory m;
     OpcodeTable opcodeTable(m);
+    std::vector<unsigned char> dummyFileContents;
+    dummyFileContents.resize(0xDFF, 0);
+    m.initialize(dummyFileContents);
 
     m.setRegister(0x0, 0xA3);
     m.setRegister(0xC, 0xD9);
@@ -225,6 +247,9 @@ TEST_CASE("test 0x6XNN handler", "OpcodeTable")
 {
     Memory m;
     OpcodeTable opcodeTable(m);
+    std::vector<unsigned char> dummyFileContents;
+    dummyFileContents.resize(0xDFF, 0);
+    m.initialize(dummyFileContents);
 
     m.setMemoryAtAddress(0x200, 0x62);
     m.setMemoryAtAddress(0x201, 0xFF);
@@ -253,6 +278,9 @@ TEST_CASE("test 0x7XNN handler", "OpcodeTable")
 {
     Memory m;
     OpcodeTable opcodeTable(m);
+    std::vector<unsigned char> dummyFileContents;
+    dummyFileContents.resize(0xDFF, 0);
+    m.initialize(dummyFileContents);
 
     m.setMemoryAtAddress(0x200, 0x7B);
     m.setMemoryAtAddress(0x201, 0x08);
@@ -272,6 +300,9 @@ TEST_CASE("test 0x8XY0 handler", "OpcodeTable")
 {
     Memory m;
     OpcodeTable opcodeTable(m);
+    std::vector<unsigned char> dummyFileContents;
+    dummyFileContents.resize(0xDFF, 0);
+    m.initialize(dummyFileContents);
 
     m.setMemoryAtAddress(0x200, 0x81);
     m.setMemoryAtAddress(0x201, 0x20);
@@ -295,6 +326,9 @@ TEST_CASE("test 0x8XY1 handler", "OpcodeTable")
 {
     Memory m;
     OpcodeTable opcodeTable(m);
+    std::vector<unsigned char> dummyFileContents;
+    dummyFileContents.resize(0xDFF, 0);
+    m.initialize(dummyFileContents);
 
     m.setRegister(0x4, 0x07);
     m.setRegister(0x5, 0xA0);
@@ -315,6 +349,9 @@ TEST_CASE("test 0x8XY2 handler", "OpcodeTable")
 {
     Memory m;
     OpcodeTable opcodeTable(m);
+    std::vector<unsigned char> dummyFileContents;
+    dummyFileContents.resize(0xDFF, 0);
+    m.initialize(dummyFileContents);
 
     m.setRegister(0x6, 0xB5);
     m.setRegister(0x7, 0x71);
@@ -335,6 +372,9 @@ TEST_CASE("test 0x8XY3 handler", "OpcodeTable")
 {
     Memory m;
     OpcodeTable opcodeTable(m);
+    std::vector<unsigned char> dummyFileContents;
+    dummyFileContents.resize(0xDFF, 0);
+    m.initialize(dummyFileContents);
 
     m.setRegister(0x8, 0xD4);
     m.setRegister(0x9, 0x37);
@@ -356,6 +396,9 @@ TEST_CASE("test 0x8XY4 handler", "OpcodeTable")
 {
     Memory m;
     OpcodeTable opcodeTable(m);
+    std::vector<unsigned char> dummyFileContents;
+    dummyFileContents.resize(0xDFF, 0);
+    m.initialize(dummyFileContents);
 
     //sum > 255
     m.setRegister(0xA, 0xFD);
@@ -393,6 +436,9 @@ TEST_CASE("test 0x8XY5 handler", "OpcodeTable")
 {
     Memory m;
     OpcodeTable opcodeTable(m);
+    std::vector<unsigned char> dummyFileContents;
+    dummyFileContents.resize(0xDFF, 0);
+    m.initialize(dummyFileContents);
 
     //X > Y
     m.setRegister(0xD, 0x25);
@@ -431,6 +477,9 @@ TEST_CASE("test 0x8XY6 handler", "OpcodeTable")
 {
     Memory m;
     OpcodeTable opcodeTable(m);
+    std::vector<unsigned char> dummyFileContents;
+    dummyFileContents.resize(0xDFF, 0);
+    m.initialize(dummyFileContents);
 
     //test least-significant bit is 1
     m.setRegister(0x8, 0x51);
@@ -465,6 +514,9 @@ TEST_CASE("test 0x8XY7 handler", "OpcodeTable")
 {
     Memory m;
     OpcodeTable opcodeTable(m);
+    std::vector<unsigned char> dummyFileContents;
+    dummyFileContents.resize(0xDFF, 0);
+    m.initialize(dummyFileContents);
 
     //test y > x
     m.setRegister(0x0, 0x05);
@@ -512,6 +564,9 @@ TEST_CASE("test 0x8XYE handler", "OpcodeTable")
 {
     Memory m;
     OpcodeTable opcodeTable(m);
+    std::vector<unsigned char> dummyFileContents;
+    dummyFileContents.resize(0xDFF, 0);
+    m.initialize(dummyFileContents);
 
     //test most-significant bit is 1
     m.setRegister(0xE, 0xD2);
@@ -545,6 +600,9 @@ TEST_CASE("test 0x9XY0 handler", "OpcodeTable")
 {
     Memory m;
     OpcodeTable opcodeTable(m);
+    std::vector<unsigned char> dummyFileContents;
+    dummyFileContents.resize(0xDFF, 0);
+    m.initialize(dummyFileContents);
 
     //test registers equal
     m.setRegister(0x0, 0xAF);
@@ -575,6 +633,9 @@ TEST_CASE("test 0xANNN handler", "OpcodeTable")
 {
     Memory m;
     OpcodeTable opcodeTable(m);
+    std::vector<unsigned char> dummyFileContents;
+    dummyFileContents.resize(0xDFF, 0);
+    m.initialize(dummyFileContents);
 
     m.setMemoryAtAddress(0x200, 0xA5);
     m.setMemoryAtAddress(0x201, 0x1D);
@@ -593,6 +654,9 @@ TEST_CASE("test 0xBNNN handler", "OpcodeTable")
 {
     Memory m;
     OpcodeTable opcodeTable(m);
+    std::vector<unsigned char> dummyFileContents;
+    dummyFileContents.resize(0xDFF, 0);
+    m.initialize(dummyFileContents);
 
     m.setRegister(0x0, 0x50);
     m.setMemoryAtAddress(0x200, 0xB3);
@@ -624,6 +688,9 @@ TEST_CASE("test 0xDXYN handler", "OpcodeTable")
 {
     Memory m;
     OpcodeTable opcodeTable(m);
+    std::vector<unsigned char> dummyFileContents;
+    dummyFileContents.resize(0xDFF, 0);
+    m.initialize(dummyFileContents);
 
     /*
      * Set the following sprites to memory
@@ -916,6 +983,9 @@ TEST_CASE("test 0xFX07 handler", "OpcodeTable")
 {
     Memory m;
     OpcodeTable opcodeTable(m);
+    std::vector<unsigned char> dummyFileContents;
+    dummyFileContents.resize(0xDFF, 0);
+    m.initialize(dummyFileContents);
 
     m.setMemoryAtAddress(0x200, 0xF3);
     m.setMemoryAtAddress(0x201, 0x07);
@@ -938,6 +1008,9 @@ TEST_CASE("test 0xFX15 handler", "OpcodeTable")
 {
     Memory m;
     OpcodeTable opcodeTable(m);
+    std::vector<unsigned char> dummyFileContents;
+    dummyFileContents.resize(0xDFF, 0);
+    m.initialize(dummyFileContents);
 
     m.setMemoryAtAddress(0x200, 0xF2);
     m.setMemoryAtAddress(0x201, 0x15);
@@ -954,6 +1027,9 @@ TEST_CASE("test 0xFX18 handler", "OpcodeTable")
 {
     Memory m;
     OpcodeTable opcodeTable(m);
+    std::vector<unsigned char> dummyFileContents;
+    dummyFileContents.resize(0xDFF, 0);
+    m.initialize(dummyFileContents);
 
     m.setMemoryAtAddress(0x200, 0xFB);
     m.setMemoryAtAddress(0x201, 0x18);
@@ -970,6 +1046,9 @@ TEST_CASE("test 0xFX1E handler", "OpcodeTable")
 {
     Memory m;
     OpcodeTable opcodeTable(m);
+    std::vector<unsigned char> dummyFileContents;
+    dummyFileContents.resize(0xDFF, 0);
+    m.initialize(dummyFileContents);
 
     m.setMemoryAtAddress(0x200, 0xF9);
     m.setMemoryAtAddress(0x201, 0x1E);
@@ -996,6 +1075,9 @@ TEST_CASE("test 0xFX33 handler", "OpcodeTable")
 {
     Memory m;
     OpcodeTable opcodeTable(m);
+    std::vector<unsigned char> dummyFileContents;
+    dummyFileContents.resize(0xDFF, 0);
+    m.initialize(dummyFileContents);
 
     m.setMemoryAtAddress(0x200, 0xF0);
     m.setMemoryAtAddress(0x201, 0x33);
@@ -1016,6 +1098,9 @@ TEST_CASE("test 0xFX55 handler", "OpcodeTable")
 {
     Memory m;
     OpcodeTable opcodeTable(m);
+    std::vector<unsigned char> dummyFileContents;
+    dummyFileContents.resize(0xDFF, 0);
+    m.initialize(dummyFileContents);
 
     m.setMemoryAtAddress(0x200, 0xFF);
     m.setMemoryAtAddress(0x201, 0x55);
@@ -1065,6 +1150,9 @@ TEST_CASE("test 0xFX65 handler", "OpcodeTable")
 {
     Memory m;
     OpcodeTable opcodeTable(m);
+    std::vector<unsigned char> dummyFileContents;
+    dummyFileContents.resize(0xDFF, 0);
+    m.initialize(dummyFileContents);
 
     m.setMemoryAtAddress(0x200, 0xFF);
     m.setMemoryAtAddress(0x201, 0x65);

@@ -36,12 +36,6 @@ int main(int argc, char* argv[])
     OpcodeTable opcodeTable(memory);
     Cpu chip8(memory, opcodeTable);
 
-    // //debug, run the emulateCycle funciton once
-    // chip8.emulateCycle();
-    // for (int i = 0; i < 10000; ++i) {
-    //     chip8.emulateCycle();
-    // }
-
     //start emulating!
     chip8.startEmulationLoop();
 
