@@ -12,8 +12,6 @@ Video::Video(
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     pixel.w = screenWidth / NUM_COLUMNS;
     pixel.h = screenHeight / NUM_ROWS;
-    // pixel.w = 1;
-    // pixel.h = 1;
 }
 
 Video::~Video()
@@ -53,9 +51,7 @@ void Video::drawPixel(const std::pair<int, int> &coordinatePair)
 std::pair<int, int> Video::translateChip8GraphicsOffsetTo2DCoordinates(int graphicsOffset)
 {
     std::pair<int, int> coordinatePoint;
-    coordinatePoint.first = (graphicsOffset / 64);
-    coordinatePoint.second = (graphicsOffset % 64);
-    // coordinatePoint.first = (graphicsOffset - (coordinatePoint.second * 32)) + (pixel.w * (graphicsOffset % 64));
-    // coordinatePoint.second = (graphicsOffset / 64) + (pixel.h * (graphicsOffset % 32));
+    coordinatePoint.first = (graphicsOffset % 64) + (pixel.w * (graphicsOffset % 64));
+    coordinatePoint.second = (graphicsOffset / 64) + (pixel.h * (graphicsOffset / 64));
     return coordinatePoint;
 }
