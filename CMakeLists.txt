@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 
 project(Chip8Interpreter)
 
-add_definitions(-std=c++11)
+add_definitions(-std=c++11 -lSDL2)
 
 include_directories("${PROJECT_SOURCE_DIR}/include")
 
@@ -12,6 +12,7 @@ add_executable(
     src/cpu.cpp
     src/memory.cpp
     src/opcodetable.cpp
+    src/interface/video.cpp
 )
 
 add_executable(

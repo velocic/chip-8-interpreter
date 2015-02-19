@@ -23,6 +23,11 @@ void Cpu::emulateCycle()
     //handleUserControls();
     memory.fetchOpcode();
     opcodeTable.decodeAndExecuteOpcode(memory.getCurrentOpcode());
+
+    if (memory.getDrawFlag() == true) {
+        video.drawScreen(memory.getGraphics());
+        memory.setDrawFlag(false);
+    }
 }
 
 void Cpu::countdownTimers()

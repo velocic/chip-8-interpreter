@@ -1,4 +1,5 @@
 #include <cpu.h>
+#include <interface/video.h>
 #include <memory.h>
 #include <opcodetable.h>
 #include <fstream>
@@ -9,12 +10,14 @@ std::vector<unsigned char> loadFile(std::ifstream &inFile);
 
 int main(int argc, char* argv[])
 {
-
     if (argc < 2) {
         std::cout << "Proper usage is \"./chip8interpreter [file path]\".";
         std::cout << std::endl;
         return 1;
     }
+
+    //Start up SDL for video/sounds/input
+    SDL_Init(SDL_INIT_VIDEO);
 
     //Read in the file
     std::ifstream inFile(argv[1], std::ios::binary);
@@ -34,10 +37,20 @@ int main(int argc, char* argv[])
     Memory memory;
     memory.initialize(fileContents);
     OpcodeTable opcodeTable(memory);
-    Cpu chip8(memory, opcodeTable);
+    Video video(
+        "Chip 8",
+        SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED,
+        640,
+        480
+    );
+    Cpu chip8(memory, opcodeTable, video);
 
-    //start emulating!
+    //Start emulating!
     chip8.startEmulationLoop();
+
+    //Close SDL before exiting
+    SDL_Quit();
 
     return 0;
 }
