@@ -1,7 +1,10 @@
 #ifndef VIDEO_H
 #define VIDEO_H
 
+#include <iostream>
 #include <string>
+#include <utility>
+#include <vector>
 #include <SDL2/SDL.h>
 
 class Video
@@ -12,15 +15,15 @@ class Video
         SDL_Rect pixel;
         const int NUM_ROWS = 32;
         const int NUM_COLUMNS = 64;
-        void drawPixel(std::pair<int, int> coordinatePair);
+        void drawPixel(const std::pair<int, int> &coordinatePair);
         std::pair<int, int> translateChip8GraphicsOffsetTo2DCoordinates(int graphicsOffset);
     public:
         Video(
             std::string windowTitle,
             int xPosition,
             int yPosition,
-            int width,
-            int height,
+            int screenWidth,
+            int screenHeight
         );
         ~Video();
         void clearScreen();

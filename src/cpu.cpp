@@ -25,6 +25,7 @@ void Cpu::emulateCycle()
     opcodeTable.decodeAndExecuteOpcode(memory.getCurrentOpcode());
 
     if (memory.getDrawFlag() == true) {
+        video.clearScreen();
         video.drawScreen(memory.getGraphics());
         memory.setDrawFlag(false);
     }

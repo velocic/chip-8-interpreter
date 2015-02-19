@@ -6,7 +6,7 @@
 #include <thread>
 #include <memory.h>
 #include <opcodetable.h>
-#include <video.h>
+#include <interface/video.h>
 class Cpu
 {
     private:

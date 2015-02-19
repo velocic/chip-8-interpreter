@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 2.8)
 
 project(Chip8Interpreter)
 
-add_definitions(-std=c++11 -lSDL2)
+# add_definitions(-std=c++11 -lSDL2)
+set(CMAKE_CXX_FLAGS "-std=c++11 -lSDL2")
 
 include_directories("${PROJECT_SOURCE_DIR}/include")
 

@@ -4,19 +4,20 @@ Video::Video(
     std::string windowTitle,
     int xPosition,
     int yPosition,
-    int width,
-    int height
+    int screenWidth,
+    int screenHeight
 )
 {
-    window = SDL_CreateWindow(windowTitle, xPosition, yPosition, width, height, SDL_WINDOW_SHOWN);
+    window = SDL_CreateWindow(windowTitle.c_str(), xPosition, yPosition, screenWidth, screenHeight, SDL_WINDOW_SHOWN);
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    pixel.w = width / NUM_COLUMNS;
-    pixel.h = height / NUM_ROWS;
+    pixel.w = screenWidth / NUM_COLUMNS;
+    pixel.h = screenHeight / NUM_ROWS;
+    // pixel.w = 1;
+    // pixel.h = 1;
 }
 
 Video::~Video()
 {
-    SDL_DestroyTexture(texture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
 }
@@ -43,9 +44,18 @@ void Video::clearScreen()
 
 void Video::drawPixel(const std::pair<int, int> &coordinatePair)
 {
-    //Set draw color to white
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-    pixel.x = coordinatePair.first * pixel.w;
-    pixel.y = coordinatePair.second * pixel.h;
+    pixel.x = coordinatePair.first;
+    pixel.y = coordinatePair.second;
     SDL_RenderFillRect(renderer, &pixel);
+}
+
+std::pair<int, int> Video::translateChip8GraphicsOffsetTo2DCoordinates(int graphicsOffset)
+{
+    std::pair<int, int> coordinatePoint;
+    coordinatePoint.first = (graphicsOffset / 64);
+    coordinatePoint.second = (graphicsOffset % 64);
+    // coordinatePoint.first = (graphicsOffset - (coordinatePoint.second * 32)) + (pixel.w * (graphicsOffset % 64));
+    // coordinatePoint.second = (graphicsOffset / 64) + (pixel.h * (graphicsOffset % 32));
+    return coordinatePoint;
 }

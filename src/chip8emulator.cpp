@@ -8,7 +8,7 @@
 
 std::vector<unsigned char> loadFile(std::ifstream &inFile);
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     if (argc < 2) {
         std::cout << "Proper usage is \"./chip8interpreter [file path]\".";
