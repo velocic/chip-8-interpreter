@@ -54,7 +54,7 @@ void Video::drawPixel(const std::pair<int, int> &coordinatePair)
 std::pair<int, int> Video::translateChip8GraphicsOffsetTo2DCoordinates(int graphicsOffset)
 {
     std::pair<int, int> coordinatePoint;
-    coordinatePoint.first = (graphicsOffset % 64) + (pixel.w * (graphicsOffset % 64));
-    coordinatePoint.second = (graphicsOffset / 64) + (pixel.h * (graphicsOffset / 64));
+    coordinatePoint.first = (graphicsOffset % 64) + ((pixel.w -1) * (graphicsOffset % 64));
+    coordinatePoint.second = (graphicsOffset / 64) + ((pixel.h -1) * (graphicsOffset / 64));
     return coordinatePoint;
 }
