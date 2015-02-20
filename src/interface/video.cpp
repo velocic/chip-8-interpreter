@@ -12,6 +12,9 @@ Video::Video(
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     pixel.w = screenWidth / NUM_COLUMNS;
     pixel.h = screenHeight / NUM_ROWS;
+    // Subtracting 1 makes the pixels fit the screen, but is probably the wrong way to solve 
+    // pixel.w = (screenWidth / NUM_COLUMNS) -1;
+    // pixel.h = (screenHeight / NUM_ROWS) - 1;
 }
 
 Video::~Video()

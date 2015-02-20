@@ -1,5 +1,6 @@
 #include <cpu.h>
 #include <interface/video.h>
+#include <interface/controls.h>
 #include <memory.h>
 #include <opcodetable.h>
 #include <fstream>
@@ -44,7 +45,9 @@ int main(int argc, char *argv[])
         640,
         480
     );
-    Cpu chip8(memory, opcodeTable, video);
+    Controls controls(SDL_GetKeyboardState(NULL));
+    SDL_Event event;
+    Cpu chip8(memory, opcodeTable, video, controls, event);
 
     //Start emulating!
     chip8.startEmulationLoop();

@@ -192,6 +192,13 @@ void Memory::setIndex(unsigned short value)
     index = value;
 }
 
+void Memory::setKeypadState(unsigned char SDLKeypadState[16])
+{
+    for (int i = 0; i < 16; ++i) {
+        keypad[i] = SDLKeypadState[i];
+    }
+}
+
 void Memory::setMemoryAtAddress(unsigned short address, unsigned char value)
 {
     //TODO: handle case of address > 0x0FFF (max addressable memory space)

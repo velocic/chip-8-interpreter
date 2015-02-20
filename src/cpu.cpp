@@ -2,8 +2,7 @@
 
 void Cpu::startEmulationLoop()
 {
-    //loop endlessly
-    for (;;) {
+    while (userRequestedQuit == false && controls.userRequestedExit() == false) {
         //get time
         auto cycleStartTime = std::chrono::high_resolution_clock::now();
         emulateCycle();
@@ -14,13 +13,13 @@ void Cpu::startEmulationLoop()
         //sleep to synchronize instruction cycle time
         std::this_thread::sleep_for(std::chrono::microseconds(instructionCycleTimeMicroseconds - cycleElapsedTime));
     }
-    //TODO: a way to terminate the program cleanly
 }
 
 void Cpu::emulateCycle()
 {
     countdownTimers();
-    //handleUserControls();
+    pollEvents();
+    memory.setKeypadState(controls.getKeypadState());
     memory.fetchOpcode();
     opcodeTable.decodeAndExecuteOpcode(memory.getCurrentOpcode());
 
@@ -45,7 +44,12 @@ void Cpu::countdownTimers()
     }
 }
 
-// void Cpu::handleUserControls()
-// {
-// }
-
+//Event queue must be polled before detecting keyboard state
+void Cpu::pollEvents()
+{
+    while (SDL_PollEvent(&event)) {
+        if (event.type == SDL_QUIT) {
+            userRequestedQuit = true;
+        }
+    }
+}

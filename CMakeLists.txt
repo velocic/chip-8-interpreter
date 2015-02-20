@@ -14,6 +14,7 @@ add_executable(
     src/memory.cpp
     src/opcodetable.cpp
     src/interface/video.cpp
+    src/interface/controls.cpp
 )
 
 add_executable(
