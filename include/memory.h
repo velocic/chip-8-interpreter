@@ -52,13 +52,14 @@ class Memory
         unsigned short getProgramCounter();
         unsigned char getRegister(unsigned char registerX);
         unsigned char getSoundTimer();
+        bool drawSpriteAtCoordinates(int drawPositionX, int drawPositionY, unsigned short spriteAddress, unsigned char spriteHeight);
         void initialize(std::vector<unsigned char> gameROM);
         bool registerEquals(unsigned char registerX, unsigned char constant);
         bool registersEqual(unsigned char registerX, unsigned char registerY);
         void setDelayTimer(unsigned char time);
         void setDrawFlag(bool drawFlag);
-        bool drawSpriteAtCoordinates(int drawPositionX, int drawPositionY, unsigned short spriteAddress, unsigned char spriteHeight);
         void setIndex(unsigned short value);
+        void setKeypadState(unsigned char SDLKeypadState[16]);
         void setMemoryAtAddress(unsigned short address, unsigned char value);
         void setProgramCounter(unsigned short newCounter);
         void setRegister(unsigned char registerX, unsigned char value);

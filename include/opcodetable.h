@@ -2,6 +2,7 @@
 #define OPCODES_H
 
 #include <chrono>
+#include <iostream>
 #include <map>
 #include <random>
 #include <memory.h>

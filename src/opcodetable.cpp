@@ -192,10 +192,11 @@ void OpcodeTable::navigateOpcode0xFJumpTable()
 
 void OpcodeTable::noOp()
 {
-    /*TODO: log warning if we get into this function. If this gets called, we
+    /* log warning if we get into this function. If this gets called, we
      * either navigated the opcode table incorrectly, or the rom file called
      * an invalid entry of the table
      */
+    std::cout << "Got into noOp with opcode " << std::hex << memory.getCurrentOpcode() << "." << std::endl;
     memory.advanceToNextInstruction();
 }
 
@@ -228,7 +229,7 @@ void OpcodeTable::opcode0x1NNN()
 //call subroutine at (opcode & 0x0FFF)
 void OpcodeTable::opcode0x2NNN()
 {
-    memory.stackPush(memory.getProgramCounter());
+    memory.stackPush(memory.getProgramCounter() + 2);
     memory.setProgramCounter(memory.getCurrentOpcode() & 0x0FFF);
 }
 
@@ -505,13 +506,33 @@ void OpcodeTable::opcode0xDXYN()
 //if the key corresponding to Vx is pressed, skip next instruction
 void OpcodeTable::opcode0xEX9E()
 {
-    //TODO: figure out a good way to get user input into this function
+    unsigned short opcode = memory.getCurrentOpcode();
+    unsigned char x = (opcode & 0x0F00) >> 8;
+    int keypadButtonIndex = memory.getRegister(x);
+    unsigned char *keypadState;
+    keypadState = memory.getKeypadState();
+
+    if (keypadState[keypadButtonIndex] == 1) {
+        memory.advanceToNextInstruction();
+    }
+
+    memory.advanceToNextInstruction();
 }
 
 //if the key corresponding to Vx is NOT pressed, skip next instruction
 void OpcodeTable::opcode0xEXA1()
 {
-    //TODO: figure out a good way to get user input into this function
+    unsigned short opcode = memory.getCurrentOpcode();
+    unsigned char x = (opcode & 0x0F00) >> 8;
+    int keypadButtonIndex = memory.getRegister(x);
+    unsigned char *keypadState;
+    keypadState = memory.getKeypadState();
+
+    if (keypadState[keypadButtonIndex] == 0) {
+        memory.advanceToNextInstruction();
+    }
+
+    memory.advanceToNextInstruction();
 }
 
 //set Vx to the value of the delay timer
@@ -528,13 +549,28 @@ void OpcodeTable::opcode0xFX07()
 //wait for a key press, then store the key's value in Vx
 void OpcodeTable::opcode0xFX0A()
 {
-    //TODO: figure out a good way to get user input into this function
+    bool keyIsPressed = false;
+    unsigned short opcode = memory.getCurrentOpcode();
+    unsigned char x = (opcode & 0x0F00) >> 8;
+    unsigned char *keypadState;
+    keypadState = memory.getKeypadState();
+
+    //Loop through keystate array. If a key is pressed, store the index
+    //of the first one we find in Vx, then allow execution to continue. Otherwise,
+    //do nothing and do not advance the program counter, repeating this opcode until
+    //a key has been pressed
+    for (int i = 0; i < 16; ++i) {
+        if (keypadState[i] == 1) {
+            memory.setRegister(x, i);
+            memory.advanceToNextInstruction();
+            break;
+        }
+    }
 }
 
 //set the delay timer to Vx
 void OpcodeTable::opcode0xFX15()
 {
-    //TODO: need to count the timer down somehow
     unsigned short opcode = memory.getCurrentOpcode();
     unsigned char x = (opcode & 0x0F00) >> 8;
 
@@ -549,7 +585,6 @@ void OpcodeTable::opcode0xFX18()
     unsigned short opcode = memory.getCurrentOpcode();
     unsigned char x = (opcode & 0x0F00) >> 8;
 
-    //TODO: need to count the timer down somehow
     memory.setSoundTimer(memory.getRegister(x));
 
     memory.advanceToNextInstruction();
@@ -569,7 +604,62 @@ void OpcodeTable::opcode0xFX1E()
 //set i to the location of the sprite for digit Vx
 void OpcodeTable::opcode0xFX29()
 {
-    //TODO: implement after setting character set into memory
+    unsigned short opcode = memory.getCurrentOpcode();
+    unsigned char x = (opcode & 0x0F00) >> 8;
+    unsigned char registerValue = memory.getRegister(x);
+
+    switch (registerValue) {
+        case 0x0:
+            memory.setIndex(0x050); //location of "0" sprite
+            break;
+        case 0x1:
+            memory.setIndex(0x055); //location of "1" sprite
+            break;
+        case 0x2:
+            memory.setIndex(0x05A); //location of "2" sprite
+            break;
+        case 0x3:
+            memory.setIndex(0x05F); //location of "3" sprite
+            break;
+        case 0x4:
+            memory.setIndex(0x064); //location of "4" sprite
+            break;
+        case 0x5:
+            memory.setIndex(0x069); //location of "5" sprite
+            break;
+        case 0x6:
+            memory.setIndex(0x06E); //location of "6" sprite
+            break;
+        case 0x7:
+            memory.setIndex(0x073); //location of "7" sprite
+            break;
+        case 0x8:
+            memory.setIndex(0x078); //location of "8" sprite
+            break;
+        case 0x9:
+            memory.setIndex(0x07D); //location of "9" sprite
+            break;
+        case 0xA:
+            memory.setIndex(0x082); //location of "A" sprite
+            break;
+        case 0xB:
+            memory.setIndex(0x087); //location of "B" sprite
+            break;
+        case 0xC:
+            memory.setIndex(0x08C); //location of "C" sprite
+            break;
+        case 0xD:
+            memory.setIndex(0x091); //location of "D" sprite
+            break;
+        case 0xE:
+            memory.setIndex(0x096); //location of "E" sprite
+            break;
+        case 0xF:
+            memory.setIndex(0x09B); //location of "F" sprite
+            break;
+    }
+
+    memory.advanceToNextInstruction();
 }
 
 //store binary-coded decimal representation of Vx in memory locations i, i+1. and i+2

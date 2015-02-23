@@ -1,4 +1,6 @@
 #include <cpu.h>
+#include <interface/video.h>
+#include <interface/controls.h>
 #include <memory.h>
 #include <opcodetable.h>
 #include <fstream>
@@ -7,14 +9,16 @@
 
 std::vector<unsigned char> loadFile(std::ifstream &inFile);
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
-
     if (argc < 2) {
-        std::cout << "Proper usage is \"./chip8interpreter [file path]\".";
+        std::cout << "Proper usage is \"" << argv[0] <<" [file path]\".";
         std::cout << std::endl;
         return 1;
     }
+
+    //Start up SDL for video/sounds/input
+    SDL_Init(SDL_INIT_VIDEO);
 
     //Read in the file
     std::ifstream inFile(argv[1], std::ios::binary);
@@ -34,13 +38,22 @@ int main(int argc, char* argv[])
     Memory memory;
     memory.initialize(fileContents);
     OpcodeTable opcodeTable(memory);
-    Cpu chip8(memory, opcodeTable);
+    Video video(
+        "Chip 8",
+        SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED,
+        640,
+        480
+    );
+    Controls controls(SDL_GetKeyboardState(NULL));
+    SDL_Event event;
+    Cpu chip8(memory, opcodeTable, video, controls, event);
 
-    // //debug, run the emulateCycle funciton once
-    // chip8.emulateCycle();
-    for (int i = 0; i < 10000; ++i) {
-        chip8.emulateCycle();
-    }
+    //Start emulating!
+    chip8.startEmulationLoop();
+
+    //Close SDL before exiting
+    SDL_Quit();
 
     return 0;
 }
