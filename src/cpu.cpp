@@ -22,6 +22,9 @@ void Cpu::emulateCycle()
     memory.setKeypadState(controls.getKeypadState());
     memory.fetchOpcode();
     opcodeTable.decodeAndExecuteOpcode(memory.getCurrentOpcode());
+    //DEBUG output opcode
+    std::cout << std::hex << (int)memory.getCurrentOpcode() << std::endl;
+    //END DEBUG
 
     if (memory.getDrawFlag() == true) {
         video.clearScreen();

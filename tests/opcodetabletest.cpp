@@ -970,12 +970,65 @@ TEST_CASE("test 0xDXYN handler", "OpcodeTable")
 
 TEST_CASE("test 0xEX9E handler", "OpcodeTable")
 {
-    //0xEX9E opcode handler not yet implemented
+    // Keypad state with "4" button on keyboard pressed
+    unsigned char keypadState[16] = {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    Memory m;
+    OpcodeTable opcodeTable(m);
+    std::vector<unsigned char> dummyFileContents;
+    dummyFileContents.resize(0xDFF, 0);
+    m.initialize(dummyFileContents);
+
+    m.setMemoryAtAddress(0x200, 0xE8);
+    m.setMemoryAtAddress(0x201, 0x9E);
+    m.setRegister(0x8, 0x3);
+    m.setKeypadState(keypadState);
+    m.fetchOpcode();
+    opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+
+    //Check that next instruction was skipped (if it wasn't, programCounter would come back with 0x202)
+    CHECK(m.getProgramCounter() == 0x204);
+
+    m.setMemoryAtAddress(0x204, 0xE9);
+    m.setMemoryAtAddress(0x205, 0x9E);
+    m.setRegister(0x9, 0);
+    m.fetchOpcode();
+    opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+
+    //Check that next instruction was not skipped
+    CHECK(m.getProgramCounter() == 0x206);
 }
 
 TEST_CASE("test 0xEXA1 handler", "OpcodeTable")
 {
-    //0xEXA1 opcode handler not yet implemented
+    // Keypad state with no buttons pressed 
+    unsigned char keypadState[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    Memory m;
+    OpcodeTable opcodeTable(m);
+    std::vector<unsigned char> dummyFileContents;
+    dummyFileContents.resize(0xDFF, 0);
+    m.initialize(dummyFileContents);
+
+    m.setMemoryAtAddress(0x200, 0xE8);
+    m.setMemoryAtAddress(0x201, 0xA1);
+    m.setRegister(0x8, 0x3);
+    m.setKeypadState(keypadState);
+    m.fetchOpcode();
+    opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+
+    //Check that next instruction was skipped (if it wasn't, programCounter would come back with 0x202)
+    CHECK(m.getProgramCounter() == 0x204);
+
+    //alter keyState to show that the "4" key is pressed
+    keypadState[3] = 1;
+    m.setMemoryAtAddress(0x204, 0xE9);
+    m.setMemoryAtAddress(0x205, 0xA1);
+    m.setKeypadState(keypadState);
+    m.setRegister(0x9, 3);
+    m.fetchOpcode();
+    opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+
+    //Check that next instruction was not skipped
+    CHECK(m.getProgramCounter() == 0x206);
 }
 
 //Register X should contain the value of the delay timer

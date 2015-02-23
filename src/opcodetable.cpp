@@ -506,13 +506,33 @@ void OpcodeTable::opcode0xDXYN()
 //if the key corresponding to Vx is pressed, skip next instruction
 void OpcodeTable::opcode0xEX9E()
 {
-    //TODO: figure out a good way to get user input into this function
+    unsigned short opcode = memory.getCurrentOpcode();
+    unsigned char x = (opcode & 0x0F00) >> 8;
+    int keypadButtonIndex = memory.getRegister(x);
+    unsigned char *keypadState;
+    keypadState = memory.getKeypadState();
+
+    if (keypadState[keypadButtonIndex] == 1) {
+        memory.advanceToNextInstruction();
+    }
+
+    memory.advanceToNextInstruction();
 }
 
 //if the key corresponding to Vx is NOT pressed, skip next instruction
 void OpcodeTable::opcode0xEXA1()
 {
-    //TODO: figure out a good way to get user input into this function
+    unsigned short opcode = memory.getCurrentOpcode();
+    unsigned char x = (opcode & 0x0F00) >> 8;
+    int keypadButtonIndex = memory.getRegister(x);
+    unsigned char *keypadState;
+    keypadState = memory.getKeypadState();
+
+    if (keypadState[keypadButtonIndex] == 0) {
+        memory.advanceToNextInstruction();
+    }
+
+    memory.advanceToNextInstruction();
 }
 
 //set Vx to the value of the delay timer
@@ -529,7 +549,23 @@ void OpcodeTable::opcode0xFX07()
 //wait for a key press, then store the key's value in Vx
 void OpcodeTable::opcode0xFX0A()
 {
-    //TODO: figure out a good way to get user input into this function
+    bool keyIsPressed = false;
+    unsigned short opcode = memory.getCurrentOpcode();
+    unsigned char x = (opcode & 0x0F00) >> 8;
+    unsigned char *keypadState;
+    keypadState = memory.getKeypadState();
+
+    //Loop through keystate array. If a key is pressed, store the index
+    //of the first one we find in Vx, then allow execution to continue. Otherwise,
+    //do nothing and do not advance the program counter, repeating this opcode until
+    //a key has been pressed
+    for (int i = 0; i < 16; ++i) {
+        if (keypadState[i] == 1) {
+            memory.setRegister(x, i);
+            memory.advanceToNextInstruction();
+            break;
+        }
+    }
 }
 
 //set the delay timer to Vx
