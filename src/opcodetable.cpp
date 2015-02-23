@@ -229,7 +229,7 @@ void OpcodeTable::opcode0x1NNN()
 //call subroutine at (opcode & 0x0FFF)
 void OpcodeTable::opcode0x2NNN()
 {
-    memory.stackPush(memory.getProgramCounter());
+    memory.stackPush(memory.getProgramCounter() + 2);
     memory.setProgramCounter(memory.getCurrentOpcode() & 0x0FFF);
 }
 
