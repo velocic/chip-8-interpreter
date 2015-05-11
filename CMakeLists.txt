@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 project(Chip8Interpreter)
 
 # add_definitions(-std=c++11 -lSDL2)
-set(CMAKE_CXX_FLAGS "-std=c++11 -lSDL2")
+set(CMAKE_CXX_FLAGS "-std=c++11")
 
 include_directories("${PROJECT_SOURCE_DIR}/include")
 
@@ -16,6 +16,8 @@ add_executable(
     src/interface/video.cpp
     src/interface/controls.cpp
 )
+
+target_link_libraries(${PROJECT_NAME} SDL2)
 
 add_executable(
     MemoryTest
