@@ -150,7 +150,7 @@ TEST_CASE("test 0x2NNN handler", "OpcodeTable")
     opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
 
     CHECK(m.getProgramCounter() == 0x5AC);
-    CHECK(m.stackPop() == 0x200);
+    CHECK(m.stackPop() == 0x202);
 }
 
 /*
@@ -1053,7 +1053,34 @@ TEST_CASE("test 0xFX07 handler", "OpcodeTable")
 //Program should wait for user input, then store the pressed key value in register X
 TEST_CASE("test 0xFX0A handler", "OpcodeTable")
 {
-    //this handler not yet implemented
+    unsigned char keystateWithoutKeypress[16];
+    unsigned char keystateWithKeypress[16];
+    keystateWithKeypress[3] = 0x01;
+    //Set up state with key not being pressed, then test that we did not
+    //advance the program counter
+    Memory m;
+    OpcodeTable opcodeTable(m);
+    std::vector<unsigned char> dummyFileContents;
+    dummyFileContents.resize(0xDFF, 0);
+    m.initialize(dummyFileContents);
+
+    m.setMemoryAtAddress(0x200, 0xF3);
+    m.setMemoryAtAddress(0x201, 0x0A);
+    m.setKeypadState(keystateWithoutKeypress);
+    m.fetchOpcode();
+    opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+    
+    CHECK(m.getProgramCounter() == 0x200);
+
+    //Set up state with key being pressed, then test that we DID
+    //advance the program counter
+    m.setMemoryAtAddress(0x200, 0xF3);
+    m.setMemoryAtAddress(0x201, 0x0A);
+    m.setKeypadState(keystateWithKeypress);
+    m.fetchOpcode();
+    opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+    
+    CHECK(m.getProgramCounter() == 0x202);
 }
 
 //Delay timer should be set to register X
@@ -1118,7 +1145,61 @@ TEST_CASE("test 0xFX1E handler", "OpcodeTable")
 //for the digit specified by register X
 TEST_CASE("test 0xFX29 handler", "OpcodeTable")
 {
-    //this handler not yet implemented
+    std::vector<unsigned char> testFixture = {
+        0xF0, 0x29,
+        0xF1, 0x29,
+        0xF2, 0x29,
+        0xF3, 0x29,
+        0xF4, 0x29,
+        0xF5, 0x29,
+        0xF6, 0x29,
+        0xF7, 0x29,
+        0xF8, 0x29,
+        0xF9, 0x29,
+        0xFA, 0x29,
+        0xFB, 0x29,
+        0xFC, 0x29,
+        0xFD, 0x29,
+        0xFE, 0x29,
+        0xFF, 0x29
+    };
+
+    unsigned short spriteMap[16];
+    spriteMap[0x0] = 0x050; //address of "0" sprite
+    spriteMap[0x1] = 0x055; //address of "1" sprite
+    spriteMap[0x2] = 0x05A; //address of "2" sprite
+    spriteMap[0x3] = 0x05F; //address of "3" sprite
+    spriteMap[0x4] = 0x064; //address of "4" sprite
+    spriteMap[0x5] = 0x069; //address of "5" sprite
+    spriteMap[0x6] = 0x06E; //address of "6" sprite
+    spriteMap[0x7] = 0x073; //address of "7" sprite
+    spriteMap[0x8] = 0x078; //address of "8" sprite
+    spriteMap[0x9] = 0x07D; //address of "9" sprite
+    spriteMap[0xA] = 0x082; //address of "A" sprite
+    spriteMap[0xB] = 0x087; //address of "B" sprite
+    spriteMap[0xC] = 0x08C; //address of "C" sprite
+    spriteMap[0xD] = 0x091; //address of "D" sprite
+    spriteMap[0xE] = 0x096; //address of "E" sprite
+    spriteMap[0xF] = 0x09B; //address of "F" sprite
+
+
+    Memory m;
+    OpcodeTable opcodeTable(m);
+    testFixture.resize(0xDFF, 0);
+    m.initialize(testFixture);
+
+    //load sprite addresses into registers
+    for (int i = 0; i < 16; ++i) {
+        m.setRegister(i, spriteMap[i]);
+    }
+
+    // test 0xF029 - 0xFF29
+    // TODO: finish implementing this test
+    // m.fetchOpcode();
+    // opcodeTable.decodeAndExecuteOpcode(m.getCurrentOpcode());
+    //
+    // CHECK(m.getIndex() == spriteMap[0]);
+    // CHECK(m.getProgramCounter() == 0x202);
 }
 
 //Memory locations Index, Index+1, and Index+2 should contain
